@@ -16,8 +16,8 @@
     :root:not([data-theme="dark"]){
       --c-bg-primary:248 249 252; --c-bg-surface:255 255 255; --c-bg-card:255 255 255;
       --c-text-primary:20 25 40; --c-text-secondary:90 100 120;
-      --c-line:0 0 0; --c-accent:20 110 220; --c-success:20 140 90;
-      --c-warning:180 120 10; --c-danger:200 50 50;
+      --c-line:0 0 0; --c-accent:20 110 220; --c-success:10 110 68;
+      --c-warning:140 88 0; --c-danger:180 40 40;
     }
   }
   :root[data-theme="dark"]{
@@ -29,8 +29,8 @@
   :root[data-theme="light"]{
     --c-bg-primary:248 249 252; --c-bg-surface:255 255 255; --c-bg-card:255 255 255;
     --c-text-primary:20 25 40; --c-text-secondary:90 100 120;
-    --c-line:0 0 0; --c-accent:20 110 220; --c-success:20 140 90;
-    --c-warning:180 120 10; --c-danger:200 50 50;
+    --c-line:0 0 0; --c-accent:20 110 220; --c-success:10 110 68;
+    --c-warning:140 88 0; --c-danger:180 40 40;
   }
   *{box-sizing:border-box}
   body{margin:0;background:rgb(var(--c-bg-primary));color:rgb(var(--c-text-primary));
@@ -60,6 +60,9 @@
   .kpi{border:1px solid rgb(var(--c-line)/.12);border-radius:10px;padding:14px;background:rgb(var(--c-bg-card))}
   .kpi .label{font-size:11px;color:rgb(var(--c-text-secondary));margin-bottom:6px}
   .kpi .value{font-size:22px;font-weight:700;font-family:ui-monospace,Menlo,monospace}
+  .outline{border:1px solid rgb(var(--c-line)/.12);border-radius:8px;padding:10px 12px;background:rgb(var(--c-bg-primary)/.4)}
+  .outline div{margin-bottom:4px}
+  .outline div:last-child{margin-bottom:0}
   .status-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
   .status-pill.green{background:rgb(var(--c-success)/.15);color:rgb(var(--c-success))}
   .status-pill.amber{background:rgb(var(--c-warning)/.15);color:rgb(var(--c-warning))}
@@ -133,18 +136,18 @@
       <small>Command Center</small>
     </div>
     <ul class="sidenav-list" id="sidenavList" role="tablist" aria-orientation="vertical">
-      <li><button class="sidenav-item" data-tab="exec" role="tab" aria-selected="true" aria-controls="tab-exec" id="navtab-exec" tabindex="0">Executive Overview</button></li>
-      <li><button class="sidenav-item" data-tab="baseline" role="tab" aria-selected="false" aria-controls="tab-baseline" id="navtab-baseline" tabindex="-1">Baseline &amp; WBS Governance</button></li>
-      <li><button class="sidenav-item" data-tab="schedule" role="tab" aria-selected="false" aria-controls="tab-schedule" id="navtab-schedule" tabindex="-1">Schedule &amp; Constraints</button></li>
-      <li><button class="sidenav-item" data-tab="evm" role="tab" aria-selected="false" aria-controls="tab-evm" id="navtab-evm" tabindex="-1">EVM &amp; Cost Engineering</button></li>
-      <li><button class="sidenav-item" data-tab="quality" role="tab" aria-selected="false" aria-controls="tab-quality" id="navtab-quality" tabindex="-1">Quality, Yield &amp; Risk</button></li>
-      <li><button class="sidenav-item" data-tab="supply" role="tab" aria-selected="false" aria-controls="tab-supply" id="navtab-supply" tabindex="-1">Supply Chain &amp; Procurement</button></li>
-      <li><button class="sidenav-item" data-tab="change" role="tab" aria-selected="false" aria-controls="tab-change" id="navtab-change" tabindex="-1">Change &amp; Traceability</button></li>
-      <li><button class="sidenav-item" data-tab="playbook" role="tab" aria-selected="false" aria-controls="tab-playbook" id="navtab-playbook" tabindex="-1">Diagnostic Playbook</button></li>
-      <li><button class="sidenav-item" data-tab="methodology" role="tab" aria-selected="false" aria-controls="tab-methodology" id="navtab-methodology" tabindex="-1">Methodology &amp; Source Ledger</button></li>
+      <li role="presentation"><button class="sidenav-item" data-tab="exec" role="tab" aria-selected="true" aria-controls="tab-exec" id="navtab-exec" tabindex="0">Executive Overview</button></li>
+      <li role="presentation"><button class="sidenav-item" data-tab="baseline" role="tab" aria-selected="false" aria-controls="tab-baseline" id="navtab-baseline" tabindex="-1">Baseline &amp; WBS Governance</button></li>
+      <li role="presentation"><button class="sidenav-item" data-tab="schedule" role="tab" aria-selected="false" aria-controls="tab-schedule" id="navtab-schedule" tabindex="-1">Schedule &amp; Constraints</button></li>
+      <li role="presentation"><button class="sidenav-item" data-tab="evm" role="tab" aria-selected="false" aria-controls="tab-evm" id="navtab-evm" tabindex="-1">EVM &amp; Cost Engineering</button></li>
+      <li role="presentation"><button class="sidenav-item" data-tab="quality" role="tab" aria-selected="false" aria-controls="tab-quality" id="navtab-quality" tabindex="-1">Quality, Yield &amp; Risk</button></li>
+      <li role="presentation"><button class="sidenav-item" data-tab="supply" role="tab" aria-selected="false" aria-controls="tab-supply" id="navtab-supply" tabindex="-1">Supply Chain &amp; Procurement</button></li>
+      <li role="presentation"><button class="sidenav-item" data-tab="change" role="tab" aria-selected="false" aria-controls="tab-change" id="navtab-change" tabindex="-1">Change &amp; Traceability</button></li>
+      <li role="presentation"><button class="sidenav-item" data-tab="playbook" role="tab" aria-selected="false" aria-controls="tab-playbook" id="navtab-playbook" tabindex="-1">Diagnostic Playbook</button></li>
+      <li role="presentation"><button class="sidenav-item" data-tab="methodology" role="tab" aria-selected="false" aria-controls="tab-methodology" id="navtab-methodology" tabindex="-1">Methodology &amp; Source Ledger</button></li>
     </ul>
     <div class="sidenav-footer">
-      <span class="tag" id="verifyBadge">✓ 163/163 CHECKS PASSING</span>
+      <span class="tag" id="verifyBadge">✓ 221/221 CHECKS PASSING</span>
       <button class="icobtn" id="themeBtn" type="button" aria-label="Toggle theme">◐ Toggle theme</button>
     </div>
   </nav>
@@ -233,7 +236,10 @@
           <div class="field"><label>MBOM line items</label><input type="number" id="baseMbomCount" value="414"></div>
           <div class="field"><label>Confirmed mismatches (part/qty/rev)</label><input type="number" id="baseBomMismatches" value="9"></div>
         </div>
-        <div class="kpi" style="max-width:260px"><div class="label">BOM Sync Variance Count</div><div class="value" id="baseBomVarianceOut">0</div></div>
+        <div class="grid cols-2">
+          <div class="kpi"><div class="label">BOM Sync Variance Count (confirmed, audited — not derived from the counts above)</div><div class="value" id="baseBomVarianceOut">0</div></div>
+          <div class="kpi"><div class="label">BOM Sync Rate</div><div class="value" id="baseBomSyncRateOut">0%</div><div style="margin-top:6px" id="baseBomSyncRatePill"></div></div>
+        </div>
       </div>
     </section>
 
@@ -572,7 +578,7 @@
 
       <div class="card">
         <div class="card-head"><h2>Status</h2></div>
-        <p style="font-size:12.5px;color:rgb(var(--c-text-secondary))">Built 2026-09-06 in direct
+        <p style="font-size:12.5px;color:rgb(var(--c-text-secondary))">Built 2026-09-05 in direct
           response to a downloaded "Domain: Project Control in Manufacturing Environments" document,
           verified via 7 parallel research passes plus a structural survey of the sibling
           <code>project-controls-command-center</code> repo (which already implements the construction
@@ -655,7 +661,13 @@
     var mbom = parseFloat(document.getElementById('baseMbomCount').value) || 0;
     var mismatches = parseFloat(document.getElementById('baseBomMismatches').value) || 0;
     document.getElementById('baseBomVarianceOut').textContent = mismatches.toString();
-    return { ebom: ebom, mbom: mbom, mismatches: mismatches };
+    // Sync rate is the one figure here actually derived from mbom + mismatches (ebom is
+    // shown for scale/context only — a line-count delta between two BOM tiers isn't itself
+    // a "mismatch," so it's deliberately not folded into this rate).
+    var syncRate = mbom > 0 ? (1 - mismatches / mbom) * 100 : 0;
+    document.getElementById('baseBomSyncRateOut').textContent = pctStr(syncRate, 2);
+    document.getElementById('baseBomSyncRatePill').innerHTML = pill(statusOf(syncRate, 98, 95));
+    return { ebom: ebom, mbom: mbom, mismatches: mismatches, syncRate: syncRate };
   }
   window.calcBomSync = calcBomSync;
   ['baseEbomCount', 'baseMbomCount', 'baseBomMismatches'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcBomSync); });
@@ -709,9 +721,9 @@
       var ok = dcmaPass(check, val);
       if (ok) passCount++;
       var inputHtml = check.dir === 'bool'
-        ? '<select id="' + inputId + '"><option value="true"' + (val ? ' selected' : '') + '>Pass</option><option value="false"' + (!val ? ' selected' : '') + '>Fail</option></select>'
-        : '<input type="number" id="' + inputId + '" value="' + val + '" step="0.01" style="width:80px">';
-      rows += '<tr><td>' + check.n + '</td><td>' + check.name + '</td><td>' + check.threshold + '</td><td>' + inputHtml + '</td><td>' + pill(ok ? 'green' : 'red') + '</td></tr>';
+        ? '<select id="' + inputId + '" aria-label="' + check.name + ' input"><option value="true"' + (val ? ' selected' : '') + '>Pass</option><option value="false"' + (!val ? ' selected' : '') + '>Fail</option></select>'
+        : '<input type="number" id="' + inputId + '" aria-label="' + check.name + ' input" value="' + val + '" step="0.01" style="width:80px">';
+      rows += '<tr><td>' + check.n + '</td><th scope="row">' + check.name + '</th><td>' + check.threshold + '</td><td>' + inputHtml + '</td><td>' + pill(ok ? 'green' : 'red') + '</td></tr>';
     });
     body.innerHTML = rows;
     dcmaInitialized = true;
@@ -879,7 +891,7 @@
   window.actionPriority = actionPriority;
   var FMEA_ITEMS = [
     { mode: 'Spindle bearing seizure (undetected coolant contamination)', s: 9, o: 3, d: 4 },
-    { mode: 'Cosmetic surface finish out of spec', s: 3, o: 8, d: 8 },
+    { mode: 'Cosmetic surface finish out of spec', s: 3, o: 8, d: 9 },
     { mode: 'Composite delamination at bond line', s: 7, o: 7, d: 7 },
     { mode: 'Fastener torque below spec, caught at final QC', s: 5, o: 4, d: 3 },
     { mode: 'Label/marking misprint, high detection rate', s: 8, o: 2, d: 9 }

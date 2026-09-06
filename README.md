@@ -3,9 +3,10 @@
 A standalone dashboard verifying and correcting a downloaded "AI research" document — "Domain:
 Project Control in Manufacturing Environments" — that proposed 30 methods and a 4-tier dashboard
 architecture for project controls in mission-critical, multi-site manufacturing programs. Nine live,
-interactive modules covering WBS/EVMS baseline governance, DCMA-14-Point schedule health, EVM/EAC
-cost engineering, QSRA Monte Carlo risk, FMEA, supply-chain/procurement controls, change governance
-and traceability, a diagnostic playbook of the remaining verified methods, and a full source ledger.
+interactive tabs: Executive Overview, Baseline & WBS Governance, Schedule & Constraints (DCMA-14-Point
+health, Critical Chain, Takt), EVM & Cost Engineering (4-method EAC), Quality, Yield & Risk (QSRA
+Monte Carlo + FMEA), Supply Chain & Procurement, Change & Traceability, a Diagnostic Playbook of the
+remaining verified methods, and a Methodology & Source Ledger.
 
 **Not a real employer's dashboard.** Every dollar figure, date, and site name is a synthetic worked
 example built to demonstrate real project-controls methodology. See the Methodology & Source Ledger
@@ -118,7 +119,7 @@ separating customer-directed changes from contractor rework.
 
 ## Verification
 
-Run: `node stress.cjs` — 163 checks, all passing as of this writing. Every golden value (EVM/EAC
+Run: `node stress.cjs` — 221 checks, all passing as of this writing. Every golden value (EVM/EAC
 figures, the QSRA Monte Carlo P50/P80/P95 percentiles, the DCMA pass count, every calculator's
 output) was pre-registered by hand or via a standalone Node script *before* being written into
 `stress.cjs`, then confirmed against the real page's own JS logic, then confirmed a second time live
@@ -136,7 +137,37 @@ correctly moved the pass count from 11/14 to 12/14).
 
 ## Status
 
-Built 2026-09-06 in direct response to a downloaded "Domain: Project Control in Manufacturing
+Built 2026-09-05 in direct response to a downloaded "Domain: Project Control in Manufacturing
 Environments" document, verified via 7 parallel research passes plus a structural survey of the
-sibling `project-controls-command-center` repo. Local commit only — push pending explicit
-confirmation, same discipline as every sibling repo in this session.
+sibling `project-controls-command-center` repo.
+
+**Second round (same day):** a `/stress-test` pass (self-review + an independent fresh-context
+reviewer) on this build found and fixed one real accessibility bug and several test/wording gaps —
+158 new checks (163→221), all re-verified live in a browser:
+- **WCAG AA contrast failure in light theme** — every status pill and colored-text KPI (green/amber/
+  red) fell below the 4.5:1 minimum against its own tinted background (measured 3.14–4.22:1).
+  Darkened the light-theme `--c-success`/`--c-warning`/`--c-danger` tokens to 4.82–5.32:1.
+- The `.outline` readout-box class was used twice but never defined in CSS (rendered with no
+  border/background) — added the rule.
+- The BOM Sync card's KPI was a verbatim echo of a manually-typed input, never actually using the
+  EBOM/MBOM counts shown above it — relabeled it as the manual/audited figure it is and added a
+  second, genuinely-derived "BOM Sync Rate" KPI.
+- Strengthened three stress.cjs checks that could pass vacuously (an unscoped "does this text exist
+  ANYWHERE" OR for the CBS correction guard; a FPY-table check that only verified GREEN/AMBER
+  appeared somewhere rather than on the correct row; a `<select>` default silently skipped by the
+  DEFAULTS-vs-HTML drift check's `value=` regex) and extended the fabrication guard to 5 more
+  corrected terms (WIP Value-at-Risk, CDE, ISA-95, ISA-101, "three clicks") that previously had no
+  automated regression guard.
+- Accessibility: added `aria-label`s to the 14 dynamically-rendered DCMA inputs and `role="row-header"`-
+  style `<th scope="row">` cells, `role="presentation"` on the sidenav `<li>` wrappers.
+- Demonstrated the FMEA `actionPriority()` function's Medium branch (previously all 5 demo rows
+  landed High or Low only).
+- Corrected a "Built 2026-09-06" date one day after both the actual git commit and this file's own
+  "Verified 2026-09-05."
+
+**Accepted limitations (unchanged from the first round):** the `#verifyBadge` count is static markup
+kept in sync by hand, same as every sibling repo; the `prefers-reduced-motion` rule has nothing to
+disable (no `transition`/`animation` exists anywhere on the page) — harmless boilerplate, left as-is.
+
+Local commit only — push pending explicit confirmation, same discipline as every sibling repo in
+this session.

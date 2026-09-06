@@ -46,10 +46,32 @@ if (correctionCardMatch) htmlOutsideCorrectionCards = htmlOutsideCorrectionCards
 if (bomTabCardMatch) htmlOutsideCorrectionCards = htmlOutsideCorrectionCards.replace(bomTabCardMatch[0], "");
 const foundWrongOutside = wrongClaimStrings.filter((s) => htmlOutsideCorrectionCards.includes(s));
 check(foundWrongOutside.length === 0, "the wrong EBOM/MBOM/PBOM sequencing claim is not asserted as fact anywhere outside the two cards that correct it", JSON.stringify(foundWrongOutside));
-check(!html.includes('"CBS"') || html.includes("is not a real EVMS pillar term"), "if \"CBS\" appears at all, it is inside the correction naming it wrong, not asserted as a real pillar term");
+// Scoped the same way as the EBOM/MBOM/PBOM check above (exclude the correction card(s), then
+// inspect what's left) rather than an unscoped OR -- an OR against "does this phrase exist
+// ANYWHERE in the document" can't catch a stray bare "CBS" mention elsewhere as long as the
+// correction sentence exists somewhere else on the page.
+const cbsOutsideCorrections = [...htmlOutsideCorrectionCards.matchAll(/.{0,30}"CBS".{0,10}/g)].map((m) => m[0]);
+check(cbsOutsideCorrections.every((s) => /not/i.test(s)), "every \"CBS\" mention outside the correction card(s) sits in a \"not CBS\" framing (a pointer to the correction), never asserted as a real pillar term", JSON.stringify(cbsOutsideCorrections));
 const vpiOccurrences = [...html.matchAll(/.{0,20}VPI.{0,10}/g)].map((m) => m[0]);
 check(vpiOccurrences.length === 3, "found the expected number of \"VPI\" mentions to check (pre-registered by grep before this check was written)", JSON.stringify(vpiOccurrences));
 check(vpiOccurrences.every((s) => /not\b|CORRECTED/i.test(s)), "every single mention of \"VPI\" in the whole page sits inside a correction context (\"not VPI\" / \"CORRECTED\"), never asserted as if it were a real standard", JSON.stringify(vpiOccurrences));
+
+// The fabrication guard above previously covered only 3 of the ~10 corrected claims named in the
+// README/Methodology tab (EBOM/MBOM/PBOM, CBS, VPI). Extending the same "every occurrence sits in
+// a correction context" idiom to the rest, so a future regression on any of them is actually
+// caught here instead of relying on a one-time manual grep.
+function checkTermOnlyInCorrectionContext(term, expectedCount, correctionIndicatorRe, contextChars) {
+  const c = contextChars || 20;
+  const re = new RegExp(`.{0,${c}}${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}.{0,${c}}`, "g");
+  const occurrences = [...html.matchAll(re)].map((m) => m[0]);
+  check(occurrences.length === expectedCount, `found the expected number of "${term}" mentions to check (pre-registered by grep before this check was written)`, JSON.stringify(occurrences));
+  check(occurrences.every((s) => correctionIndicatorRe.test(s)), `every mention of "${term}" sits inside a correction context, never asserted as if it were a real/verified claim`, JSON.stringify(occurrences));
+}
+checkTermOnlyInCorrectionContext("WIP Value-at-Risk", 1, /CORRECTED|not an established/i);
+checkTermOnlyInCorrectionContext("CDE", 4, /construction\/BIM-native|corrected|not CDE/i, 60);
+checkTermOnlyInCorrectionContext("ISA-95", 2, /does not match/i, 50);
+checkTermOnlyInCorrectionContext("ISA-101", 2, /separate/i, 50);
+checkTermOnlyInCorrectionContext("three click", 1, /CORRECTED/i, 30);
 
 console.log("--- Executing the real inline script in a stubbed DOM ---");
 const scriptMatch = html.match(/<script>\s*\(function\(\)\{[\s\S]*?\}\)\(\);\s*<\/script>/);
@@ -76,16 +98,33 @@ const DEFAULTS = {
   scopeCustomerDirected: "340000", scopeContractorRework: "95000", scopeReaRecovered: "298000",
   cqTotal: "24", cqSignedOff: "19",
 };
-// Cross-check DEFAULTS against the HTML's own value= attributes so this harness can't silently
-// drift from the real page if a default is ever changed there and not here.
+// Cross-check DEFAULTS against the HTML's own value= attributes, so this harness can't silently
+// drift from the real page if a default is ever changed there and not here. This regex only
+// matches <input value="..."> shapes -- a <select> carries its default on a child <option>, not
+// on the <select> tag itself, so ppapFramework (the one <select> in DEFAULTS) is cross-checked
+// separately below rather than silently skipped by the `if (m)` guard.
 Object.keys(DEFAULTS).forEach((id) => {
+  if (id === "ppapFramework") return;
   const re = new RegExp(`id="${id}"[^>]*value="([^"]*)"|value="([^"]*)"[^>]*id="${id}"`);
   const m = html.match(re);
+  check(!!m, `harness default for #${id} has a matching value= attribute in the HTML to cross-check against`);
   if (m) {
     const real = m[1] !== undefined ? m[1] : m[2];
     check(real === DEFAULTS[id], `harness default for #${id} matches the HTML's own value= attribute`, `harness=${DEFAULTS[id]} html=${real}`);
   }
 });
+// ppapFramework: no <option> carries `selected`, so the browser (and the DOM stub, which reads
+// DEFAULTS directly) defaults to the FIRST <option>'s value.
+const ppapSelectMatch = html.match(/<select id="ppapFramework">([\s\S]*?)<\/select>/);
+check(!!ppapSelectMatch, "found the ppapFramework <select> block to cross-check its default against");
+if (ppapSelectMatch) {
+  check(!ppapSelectMatch[1].includes(" selected"), "no <option> in ppapFramework carries `selected` -- confirms the first option really is the default, not an assumption");
+  const firstOptionMatch = ppapSelectMatch[1].match(/<option value="([^"]*)"/);
+  check(!!firstOptionMatch, "found ppapFramework's first <option> to read its value from");
+  if (firstOptionMatch) {
+    check(firstOptionMatch[1] === DEFAULTS.ppapFramework, "harness default for #ppapFramework matches the HTML's first <option>'s value", `harness=${DEFAULTS.ppapFramework} html=${firstOptionMatch[1]}`);
+  }
+}
 
 const elements = {};
 function makeElement(id) {
@@ -210,9 +249,20 @@ check(sandbox.actionPriority(3, 8, 8) === "Low", "a low-severity, high-RPN (192)
 const fmea = sandbox.renderFmea();
 check(fmea.items.length === 5, "exactly 5 FMEA items are modeled", fmea.items.length);
 check(elements.fmeaDivergenceNote.textContent.includes("Spindle bearing seizure") && elements.fmeaDivergenceNote.textContent.includes("RPN=108"), "the rendered divergence note correctly identifies the specific RPN-vs-AP mismatch case", elements.fmeaDivergenceNote.textContent);
+// All 5 demo rows previously resolved to only High or Low -- actionPriority()'s Medium branch
+// (rpn>=200, s<9, not the s*o>=40&&d>=5 High rule) was never exercised by any visible example.
+check(sandbox.actionPriority(3, 8, 9) === "Medium", "the Cosmetic surface finish item (s=3,o=8,d=9, rpn=216) now demonstrates the Medium Action-Priority branch, previously unexercised by any FMEA_ITEMS row", sandbox.actionPriority(3, 8, 9));
+check((elements.fmeaBody.innerHTML.match(/;font-weight:700">Medium</g) || []).length === 1, "exactly one rendered FMEA row shows Action-Priority Medium", elements.fmeaBody.innerHTML);
 const fpy = sandbox.renderFpy();
 check(fpy.sites.length === 4, "exactly 4 FPY sites are modeled", fpy.sites.length);
-check(elements.fpyBody.innerHTML.includes(">GREEN<") && elements.fpyBody.innerHTML.includes(">AMBER<"), "FPY sites are correctly banded (Site A/D green, Site B/C amber given 90-95% thresholds)", elements.fpyBody.innerHTML);
+// Per-row, not just "GREEN and AMBER appear somewhere" -- that weaker form would still pass on a
+// scrambled site-to-status mapping. Golden bands pre-registered from statusOf(fpy, 95, 90):
+// Site A 97.2 -> green, Site B 94.8 -> amber, Site C 91.5 -> amber, Site D 98.1 -> green.
+const fpyGoldenBands = { "Site A": "GREEN", "Site B": "AMBER", "Site C": "AMBER", "Site D": "GREEN" };
+Object.keys(fpyGoldenBands).forEach((site) => {
+  const rowRe = new RegExp(`<td>${site}</td><td class="mono">[\\d.]+%</td><td>.*?>${fpyGoldenBands[site]}<`);
+  check(rowRe.test(elements.fpyBody.innerHTML), `${site} is specifically banded ${fpyGoldenBands[site]}, not just present somewhere in the table`, elements.fpyBody.innerHTML);
+});
 const rcca = sandbox.calcRcca();
 check(rcca.contain === 4, "RCCA containment cycle time (D1->D3) matches golden value", rcca.contain);
 check(rcca.total === 32, "RCCA total cycle time (D1->D8) matches golden value", rcca.total);
