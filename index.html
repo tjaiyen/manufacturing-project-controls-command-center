@@ -16,7 +16,7 @@
     :root:not([data-theme="dark"]){
       --c-bg-primary:248 249 252; --c-bg-surface:255 255 255; --c-bg-card:255 255 255;
       --c-text-primary:20 25 40; --c-text-secondary:90 100 120;
-      --c-line:0 0 0; --c-accent:20 110 220; --c-success:10 110 68;
+      --c-line:0 0 0; --c-accent:15 90 180; --c-success:10 110 68;
       --c-warning:140 88 0; --c-danger:180 40 40;
     }
   }
@@ -29,7 +29,7 @@
   :root[data-theme="light"]{
     --c-bg-primary:248 249 252; --c-bg-surface:255 255 255; --c-bg-card:255 255 255;
     --c-text-primary:20 25 40; --c-text-secondary:90 100 120;
-    --c-line:0 0 0; --c-accent:20 110 220; --c-success:10 110 68;
+    --c-line:0 0 0; --c-accent:15 90 180; --c-success:10 110 68;
     --c-warning:140 88 0; --c-danger:180 40 40;
   }
   *{box-sizing:border-box}
@@ -218,8 +218,8 @@
           a WBS element, an OBS owner, <b>and</b> a Chart-of-Accounts code — EIA-748 explicitly forbids
           one control account spanning two WBS elements. Edit the counts below.</p>
         <div class="field-row">
-          <div class="field"><label>Total control accounts</label><input type="number" id="baseTotalCA" value="8"></div>
-          <div class="field"><label>Fully 1:1 mapped (WBS+OBS+CoA)</label><input type="number" id="baseMappedCA" value="6"></div>
+          <div class="field"><label for="baseTotalCA">Total control accounts</label><input type="number" id="baseTotalCA" value="8"></div>
+          <div class="field"><label for="baseMappedCA">Fully 1:1 mapped (WBS+OBS+CoA)</label><input type="number" id="baseMappedCA" value="6"></div>
         </div>
         <div class="kpi" style="max-width:260px"><div class="label">Control Account Integrity Rate</div><div class="value" id="baseIntegrityOut">0%</div></div>
       </div>
@@ -232,9 +232,9 @@
           tier that follows MBOM. The real, documented lineage is EBOM → MBOM (sometimes extended by an
           SBOM for aftermarket). Corrected here.</p>
         <div class="field-row">
-          <div class="field"><label>EBOM line items</label><input type="number" id="baseEbomCount" value="420"></div>
-          <div class="field"><label>MBOM line items</label><input type="number" id="baseMbomCount" value="414"></div>
-          <div class="field"><label>Confirmed mismatches (part/qty/rev)</label><input type="number" id="baseBomMismatches" value="9"></div>
+          <div class="field"><label for="baseEbomCount">EBOM line items</label><input type="number" id="baseEbomCount" value="420"></div>
+          <div class="field"><label for="baseMbomCount">MBOM line items</label><input type="number" id="baseMbomCount" value="414"></div>
+          <div class="field"><label for="baseBomMismatches">Confirmed mismatches (part/qty/rev)</label><input type="number" id="baseBomMismatches" value="9"></div>
         </div>
         <div class="grid cols-2">
           <div class="kpi"><div class="label">BOM Sync Variance Count (confirmed, audited — not derived from the counts above)</div><div class="value" id="baseBomVarianceOut">0</div></div>
@@ -263,8 +263,8 @@
         <p class="lede" style="margin-bottom:8px">Buffer consumption plotted against % of the critical
           chain complete — green (buffer holding), amber (watch), red (buffer burn outpacing progress).</p>
         <div class="field-row">
-          <div class="field"><label>% critical chain complete</label><input type="number" id="ccChainComplete" value="50" step="1"></div>
-          <div class="field"><label>% project buffer consumed</label><input type="number" id="ccBufferConsumed" value="55" step="1"></div>
+          <div class="field"><label for="ccChainComplete">% critical chain complete</label><input type="number" id="ccChainComplete" value="50" step="1"></div>
+          <div class="field"><label for="ccBufferConsumed">% project buffer consumed</label><input type="number" id="ccBufferConsumed" value="55" step="1"></div>
         </div>
         <div class="kpi" style="max-width:260px"><div class="label">Fever status</div><div class="value" id="ccStatusOut">—</div></div>
       </div>
@@ -274,8 +274,8 @@
         <p class="lede" style="margin-bottom:8px">Zone-by-zone actual cycle time vs. the takt target
           (±5% tolerance). Real, documented Lean Construction practice, not a novel cross-application.</p>
         <div class="field-row">
-          <div class="field"><label>Takt target (seconds)</label><input type="number" id="taktTarget" value="180"></div>
-          <div class="field"><label>Zone cycle times, comma-separated</label><input type="text" id="taktZones" value="175,182,190,178,185"></div>
+          <div class="field"><label for="taktTarget">Takt target (seconds)</label><input type="number" id="taktTarget" value="180"></div>
+          <div class="field"><label for="taktZones">Zone cycle times, comma-separated</label><input type="text" id="taktZones" value="175,182,190,178,185"></div>
         </div>
         <div class="kpi" style="max-width:260px"><div class="label">Takt adherence %</div><div class="value" id="taktAdherenceOut">0%</div></div>
       </div>
@@ -291,14 +291,14 @@
         <div class="card">
           <div class="card-head"><h2>EVM Ledger</h2><span class="tag">EIA-748</span></div>
           <div class="field-row">
-            <div class="field"><label>BAC ($)</label><input type="number" id="evmBac" value="45000000"></div>
-            <div class="field"><label>PV ($)</label><input type="number" id="evmPv" value="18000000"></div>
+            <div class="field"><label for="evmBac">BAC ($)</label><input type="number" id="evmBac" value="45000000"></div>
+            <div class="field"><label for="evmPv">PV ($)</label><input type="number" id="evmPv" value="18000000"></div>
           </div>
           <div class="field-row">
-            <div class="field"><label>EV ($)</label><input type="number" id="evmEv" value="16200000"></div>
-            <div class="field"><label>AC ($)</label><input type="number" id="evmAc" value="17500000"></div>
+            <div class="field"><label for="evmEv">EV ($)</label><input type="number" id="evmEv" value="16200000"></div>
+            <div class="field"><label for="evmAc">AC ($)</label><input type="number" id="evmAc" value="17500000"></div>
           </div>
-          <div class="field"><label>Bottom-up ETC for remaining work ($, for EAC method 4)</label><input type="number" id="evmEtcBottomUp" value="29500000"></div>
+          <div class="field"><label for="evmEtcBottomUp">Bottom-up ETC for remaining work ($, for EAC method 4)</label><input type="number" id="evmEtcBottomUp" value="29500000"></div>
           <div class="outline" style="margin-top:8px;font-size:12.5px">
             <div>CV = EV − AC: <b class="mono" id="outCv">$0</b></div>
             <div>SV = EV − PV: <b class="mono" id="outSv">$0</b></div>
@@ -331,15 +331,16 @@
       <div class="card">
         <div class="card-head"><h2>QSRA — Monte Carlo Schedule Risk</h2><span class="tag">AACE 57R-09</span></div>
         <div class="field-row">
-          <div class="field"><label>Optimistic (days)</label><input type="number" id="qsraMin" value="180"></div>
-          <div class="field"><label>Most likely (days)</label><input type="number" id="qsraMode" value="210"></div>
-          <div class="field"><label>Pessimistic (days)</label><input type="number" id="qsraMax" value="270"></div>
+          <div class="field"><label for="qsraMin">Optimistic (days)</label><input type="number" id="qsraMin" value="180"></div>
+          <div class="field"><label for="qsraMode">Most likely (days)</label><input type="number" id="qsraMode" value="210"></div>
+          <div class="field"><label for="qsraMax">Pessimistic (days)</label><input type="number" id="qsraMax" value="270"></div>
         </div>
         <div class="grid cols-3">
           <div class="kpi"><div class="label">P50 completion</div><div class="value" id="qsraP50Out">0 days</div></div>
           <div class="kpi"><div class="label">P80 completion</div><div class="value" id="qsraP80Out">0 days</div></div>
           <div class="kpi"><div class="label">P95 completion</div><div class="value" id="qsraP95Out">0 days</div></div>
         </div>
+        <p id="qsraOrderFlag" style="font-size:12px;color:rgb(var(--c-warning));margin-top:6px"></p>
         <p style="font-size:11px;color:rgb(var(--c-text-secondary));margin-top:8px">Seeded PRNG
           (mulberry32) over a triangular distribution, 5,000 trials — deterministic, not
           <code>Math.random()</code>, so the same inputs always reproduce the same percentiles.</p>
@@ -371,9 +372,9 @@
         <div class="card">
           <div class="card-head"><h2>8D / RCCA Cycle Time</h2><span class="tag">FORD 8D, 1987</span></div>
           <div class="field-row">
-            <div class="field"><label>D1 opened (day 0 = today)</label><input type="number" id="rccaD1" value="0"></div>
-            <div class="field"><label>D3 containment (day)</label><input type="number" id="rccaD3" value="4"></div>
-            <div class="field"><label>D8 closed (day)</label><input type="number" id="rccaD8" value="32"></div>
+            <div class="field"><label for="rccaD1">D1 opened (day 0 = today)</label><input type="number" id="rccaD1" value="0"></div>
+            <div class="field"><label for="rccaD3">D3 containment (day)</label><input type="number" id="rccaD3" value="4"></div>
+            <div class="field"><label for="rccaD8">D8 closed (day)</label><input type="number" id="rccaD8" value="32"></div>
           </div>
           <div class="outline" style="font-size:12.5px">
             <div>Containment cycle time (D1→D3): <b class="mono" id="rccaContainOut">0 days</b></div>
@@ -390,13 +391,13 @@
           <b>AS9145</b> standard (11 deliverables). Pick the correct framework — don't apply automotive
           PPAP language to an aerospace program.</p>
         <div class="field-row">
-          <div class="field"><label>Framework</label>
+          <div class="field"><label for="ppapFramework">Framework</label>
             <select id="ppapFramework">
               <option value="aiag">Automotive — AIAG PPAP (18 elements)</option>
               <option value="as9145">Aerospace/Defense — AS9145 (11 deliverables)</option>
             </select>
           </div>
-          <div class="field"><label>Elements/deliverables complete</label><input type="number" id="ppapComplete" value="14"></div>
+          <div class="field"><label for="ppapComplete">Elements/deliverables complete</label><input type="number" id="ppapComplete" value="14"></div>
         </div>
         <div class="kpi" style="max-width:260px"><div class="label">Gate completion</div><div class="value" id="ppapCompletionOut">0%</div></div>
       </div>
@@ -413,16 +414,16 @@
         <div class="card">
           <div class="card-head"><h2>Tier-N Visibility Coverage</h2><span class="tag">REAL TERMINOLOGY</span></div>
           <div class="field-row">
-            <div class="field"><label>Critical / single-source parts</label><input type="number" id="tierCriticalParts" value="42"></div>
-            <div class="field"><label>Mapped to confirmed Tier-2+ source</label><input type="number" id="tierMappedParts" value="31"></div>
+            <div class="field"><label for="tierCriticalParts">Critical / single-source parts</label><input type="number" id="tierCriticalParts" value="42"></div>
+            <div class="field"><label for="tierMappedParts">Mapped to confirmed Tier-2+ source</label><input type="number" id="tierMappedParts" value="31"></div>
           </div>
           <div class="kpi" style="max-width:260px"><div class="label">Sub-tier visibility coverage</div><div class="value" id="tierCoverageOut">0%</div></div>
         </div>
         <div class="card">
           <div class="card-head"><h2>Dual-Source Coverage</h2><span class="tag">CLASSICAL SCRM</span></div>
           <div class="field-row">
-            <div class="field"><label>Critical parts</label><input type="number" id="dualCriticalParts" value="42"></div>
-            <div class="field"><label>Dual-sourced (qualified 2nd source)</label><input type="number" id="dualSourcedParts" value="18"></div>
+            <div class="field"><label for="dualCriticalParts">Critical parts</label><input type="number" id="dualCriticalParts" value="42"></div>
+            <div class="field"><label for="dualSourcedParts">Dual-sourced (qualified 2nd source)</label><input type="number" id="dualSourcedParts" value="18"></div>
           </div>
           <div class="kpi" style="max-width:260px"><div class="label">Dual-source coverage %</div><div class="value" id="dualCoverageOut">0%</div></div>
         </div>
@@ -431,9 +432,9 @@
       <div class="card">
         <div class="card-head"><h2>FAT/SAT Milestone-Payment Gate</h2><span class="tag">IEC 62381 / ISA-105</span></div>
         <div class="field-row">
-          <div class="field"><label>Contract value ($)</label><input type="number" id="fatContractValue" value="2400000"></div>
-          <div class="field"><label>Released at FAT (%)</label><input type="number" id="fatPct" value="20"></div>
-          <div class="field"><label>Released at SAT (%)</label><input type="number" id="satPct" value="12"></div>
+          <div class="field"><label for="fatContractValue">Contract value ($)</label><input type="number" id="fatContractValue" value="2400000"></div>
+          <div class="field"><label for="fatPct">Released at FAT (%)</label><input type="number" id="fatPct" value="20"></div>
+          <div class="field"><label for="satPct">Released at SAT (%)</label><input type="number" id="satPct" value="12"></div>
         </div>
         <div class="tblwrap"><table>
           <thead><tr><th>Milestone</th><th>% of contract</th><th>$ released</th></tr></thead>
@@ -444,9 +445,9 @@
       <div class="card">
         <div class="card-head"><h2>Supplier Scorecard</h2><span class="tag">CORRECTED — NOT "VPI"</span></div>
         <div class="field-row">
-          <div class="field"><label>OTIF (%)</label><input type="number" id="scOtif" value="91.5" step="0.1"></div>
-          <div class="field"><label>Defect PPM</label><input type="number" id="scPpm" value="340"></div>
-          <div class="field"><label>Billing variance (%)</label><input type="number" id="scBilling" value="2.1" step="0.1"></div>
+          <div class="field"><label for="scOtif">OTIF (%)</label><input type="number" id="scOtif" value="91.5" step="0.1"></div>
+          <div class="field"><label for="scPpm">Defect PPM</label><input type="number" id="scPpm" value="340"></div>
+          <div class="field"><label for="scBilling">Billing variance (%)</label><input type="number" id="scBilling" value="2.1" step="0.1"></div>
         </div>
         <div class="grid cols-3">
           <div class="kpi"><div class="label">OTIF</div><div class="value" id="scOtifOut">0%</div></div>
@@ -466,14 +467,14 @@
       <div class="grid cols-2">
         <div class="card">
           <div class="card-head"><h2>ECO Cycle Time</h2><span class="tag">PLM / ECB</span></div>
-          <div class="field"><label>ECO cycle times, days, comma-separated</label><input type="text" id="ecoCycleTimes" value="6,11,8,14,7,10"></div>
+          <div class="field"><label for="ecoCycleTimes">ECO cycle times, days, comma-separated</label><input type="text" id="ecoCycleTimes" value="6,11,8,14,7,10"></div>
           <div class="kpi" style="max-width:260px"><div class="label">Average ECO cycle time</div><div class="value" id="ecoAvgOut">0 days</div></div>
         </div>
         <div class="card">
           <div class="card-head"><h2>Digital Thread Completeness</h2><span class="tag">USAF, 2013 ORIGIN</span></div>
           <div class="field-row">
-            <div class="field"><label>Serialized units shipped</label><input type="number" id="dtUnits" value="1200"></div>
-            <div class="field"><label>Units with complete as-designed→as-built→as-tested record</label><input type="number" id="dtComplete" value="1092"></div>
+            <div class="field"><label for="dtUnits">Serialized units shipped</label><input type="number" id="dtUnits" value="1200"></div>
+            <div class="field"><label for="dtComplete">Units with complete as-designed→as-built→as-tested record</label><input type="number" id="dtComplete" value="1092"></div>
           </div>
           <div class="kpi" style="max-width:260px"><div class="label">Digital Thread completeness</div><div class="value" id="dtCompletenessOut">0%</div></div>
         </div>
@@ -482,9 +483,9 @@
       <div class="card">
         <div class="card-head"><h2>Scope Creep &amp; REA Recovery</h2><span class="tag">FAR CHANGES CLAUSE</span></div>
         <div class="field-row">
-          <div class="field"><label>Customer-directed scope change ($)</label><input type="number" id="scopeCustomerDirected" value="340000"></div>
-          <div class="field"><label>Contractor-caused rework, non-recoverable ($)</label><input type="number" id="scopeContractorRework" value="95000"></div>
-          <div class="field"><label>REA $ recovered</label><input type="number" id="scopeReaRecovered" value="298000"></div>
+          <div class="field"><label for="scopeCustomerDirected">Customer-directed scope change ($)</label><input type="number" id="scopeCustomerDirected" value="340000"></div>
+          <div class="field"><label for="scopeContractorRework">Contractor-caused rework, non-recoverable ($)</label><input type="number" id="scopeContractorRework" value="95000"></div>
+          <div class="field"><label for="scopeReaRecovered">REA $ recovered</label><input type="number" id="scopeReaRecovered" value="298000"></div>
         </div>
         <div class="kpi" style="max-width:260px"><div class="label">REA recovery rate</div><div class="value" id="reaRecoveryOut">0%</div></div>
       </div>
@@ -499,8 +500,8 @@
           terminology instead (ISPE Baseline Guide Vol. 5) — reserve IQ/OQ/PQ for genuinely
           FDA-regulated scope.</p>
         <div class="field-row">
-          <div class="field"><label>Total protocols</label><input type="number" id="cqTotal" value="24"></div>
-          <div class="field"><label>Signed off</label><input type="number" id="cqSignedOff" value="19"></div>
+          <div class="field"><label for="cqTotal">Total protocols</label><input type="number" id="cqTotal" value="24"></div>
+          <div class="field"><label for="cqSignedOff">Signed off</label><input type="number" id="cqSignedOff" value="19"></div>
         </div>
         <div class="kpi" style="max-width:260px"><div class="label">C&amp;Q completion</div><div class="value" id="cqCompletionOut">0%</div></div>
       </div>
@@ -707,6 +708,11 @@
   // make every check read NaN from an empty stub element instead of DCMA_DEFAULTS on first render.
   function renderDcma(){
     var body = document.getElementById('dcmaBody');
+    // Rebuilding dcmaBody's innerHTML below destroys and recreates every DCMA input/select node --
+    // in a real browser that moves focus to <body> mid-edit if one of them was focused, dropping any
+    // further keystrokes of that same edit. Remember which one (if any) had focus so it can be
+    // refocused after the rebuild.
+    var focusedId = document.activeElement ? document.activeElement.id : null;
     var rows = '';
     var passCount = 0;
     DCMA_CHECKS.forEach(function(check){
@@ -731,6 +737,10 @@
       var el = document.getElementById('dcma_' + check.key);
       if (el && !el.dataset.wired){ el.dataset.wired = '1'; el.addEventListener('input', renderDcma); el.addEventListener('change', renderDcma); }
     });
+    if (focusedId && focusedId.indexOf('dcma_') === 0) {
+      var toRefocus = document.getElementById(focusedId);
+      if (toRefocus && toRefocus.focus) toRefocus.focus();
+    }
     var rate = (passCount / DCMA_CHECKS.length) * 100;
     document.getElementById('dcmaPassRateOut').textContent = passCount + '/' + DCMA_CHECKS.length + ' (' + rate.toFixed(2) + '%)';
     return { passCount: passCount, total: DCMA_CHECKS.length, rate: rate };
@@ -768,11 +778,11 @@
     var BAC = parseFloat(document.getElementById('evmBac').value) || 0;
     var PV = parseFloat(document.getElementById('evmPv').value) || 0;
     var EV = parseFloat(document.getElementById('evmEv').value) || 0;
-    var AC = parseFloat(document.getElementById('evmAc').value) || 1;
+    var AC = parseFloat(document.getElementById('evmAc').value) || 0;
     var etcBottomUp = parseFloat(document.getElementById('evmEtcBottomUp').value) || 0;
 
     var CV = EV - AC, SV = EV - PV;
-    var CPI = EV / AC, SPI = PV !== 0 ? EV / PV : 0;
+    var CPI = AC !== 0 ? EV / AC : 0, SPI = PV !== 0 ? EV / PV : 0;
     var TCPI_BAC = (BAC - AC) !== 0 ? (BAC - EV) / (BAC - AC) : 0;
 
     var EAC1 = AC + (BAC - EV);                          // one-time variance, no more expected
@@ -864,6 +874,19 @@
     var a = parseFloat(document.getElementById('qsraMin').value) || 0;
     var c = parseFloat(document.getElementById('qsraMode').value) || 0;
     var b = parseFloat(document.getElementById('qsraMax').value) || 0;
+    var flag = document.getElementById('qsraOrderFlag');
+    // triangularSample()'s inverse-CDF formula assumes Min <= Mode <= Max -- fed out-of-order bounds
+    // (e.g. Optimistic and Pessimistic swapped), it produces samples entirely outside either reading
+    // of the envelope. Refuse to run the simulation on invalid ordering rather than render silently
+    // wrong percentiles.
+    if (!(a <= c && c <= b)) {
+      flag.textContent = 'Invalid: Optimistic ≤ Most likely ≤ Pessimistic is required for a valid triangular distribution. Monte Carlo skipped until the three inputs are back in order.';
+      document.getElementById('qsraP50Out').textContent = '— days';
+      document.getElementById('qsraP80Out').textContent = '— days';
+      document.getElementById('qsraP95Out').textContent = '— days';
+      return { p50: null, p80: null, p95: null, samples: [], invalidOrder: true };
+    }
+    flag.textContent = '';
     var rand = mulberry32(42);
     var trials = 5000;
     var samples = [];
@@ -874,7 +897,7 @@
     document.getElementById('qsraP50Out').textContent = p50.toFixed(1) + ' days';
     document.getElementById('qsraP80Out').textContent = p80.toFixed(1) + ' days';
     document.getElementById('qsraP95Out').textContent = p95.toFixed(1) + ' days';
-    return { p50: p50, p80: p80, p95: p95, samples: samples };
+    return { p50: p50, p80: p80, p95: p95, samples: samples, invalidOrder: false };
   }
   window.calcQsra = calcQsra;
   ['qsraMin', 'qsraMode', 'qsraMax'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcQsra); });

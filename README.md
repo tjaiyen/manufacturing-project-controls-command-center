@@ -119,7 +119,7 @@ separating customer-directed changes from contractor rework.
 
 ## Verification
 
-Run: `node stress.cjs` — 221 checks, all passing as of this writing. Every golden value (EVM/EAC
+Run: `node stress.cjs` — 239 checks, all passing as of this writing. Every golden value (EVM/EAC
 figures, the QSRA Monte Carlo P50/P80/P95 percentiles, the DCMA pass count, every calculator's
 output) was pre-registered by hand or via a standalone Node script *before* being written into
 `stress.cjs`, then confirmed against the real page's own JS logic, then confirmed a second time live
@@ -168,6 +168,47 @@ reviewer) on this build found and fixed one real accessibility bug and several t
 **Accepted limitations (unchanged from the first round):** the `#verifyBadge` count is static markup
 kept in sync by hand, same as every sibling repo; the `prefers-reduced-motion` rule has nothing to
 disable (no `transition`/`animation` exists anywhere on the page) — harmless boilerplate, left as-is.
+
+**Third round (2026-09-06):** an external review pass found 5 more real defects (2 HIGH bugs, 1 MED
+bug, 2 HIGH accessibility gaps), all fixed and re-verified — checks: 221 → 239 (+18), each new check
+confirmed to fail on the pre-fix code before being kept (reverted locally, re-run, restored):
+- **HIGH:** EVM's AC ($) field defaulted to 1 (not 0) on an empty/cleared input via
+  `parseFloat(...) || 1` — unlike every other `calcEvm()` field, and unlike SPI's own explicit
+  `PV !== 0` zero-guard. Clearing AC silently corrupted CPI (and every EAC/TCPI computed from it) into
+  a division artifact instead of an honest zero — e.g. CPI rendered as `16200000.0000` (literally EV)
+  and EAC-2/EAC-3 collapsed to single-digit dollar amounts for a $45M program. Guarded AC to 0 and CPI
+  to the same zero-guard pattern SPI already uses.
+- **HIGH:** `renderDcma()` rebuilds the entire DCMA table's innerHTML on every keystroke, destroying
+  and recreating all 14 input/select nodes with no `.focus()` call to restore the edit point —
+  confirmed live that this really does swap in a new DOM node on every edit, which moved focus to
+  `<body>` mid-edit and dropped any edit needing more than one keystroke (a 2-digit value, a decimal,
+  a typo fix). This is the real mechanism behind the DCMA "re-render" accepted limitation above —
+  the single-character edit previously reported as "confirmed working" was the one case that couldn't
+  expose it. Now captures the focused input's id before the rebuild and refocuses it afterward —
+  confirmed live that a simulated two-keystroke edit ("1" then "2") now lands as "12" instead of being
+  dropped after the first character.
+- **MED:** `calcQsra()` never validated Min ≤ Mode ≤ Max before feeding `triangularSample()`, which
+  assumes that ordering — an inverted Min/Max (e.g. Optimistic/Pessimistic swapped) produced 5,000
+  samples entirely outside either reading of the stated envelope with no warning shown (P50 rendered
+  "300.2 days" against inputs of 270/210/180, exceeding every entered number). Added an order check
+  that skips the simulation and shows a visible warning instead of fabricating percentiles.
+- **HIGH (a11y):** the `.tag` badge class (24 badges across every tab, incl. `#verifyBadge`) rendered
+  `--c-accent` text on its own 15%-opacity tint in light theme at 3.98:1 contrast — below the WCAG AA
+  4.5:1 minimum. The second round darkened `--c-success`/`--c-warning`/`--c-danger` for the identical
+  bug class but never touched `--c-accent`, which this separate, widely-used component still relied
+  on. Darkened the light-theme token to `15 90 180` — confirmed live via `getComputedStyle` contrast
+  math on the rendered page (5.30:1).
+- **HIGH (a11y):** 40 of the page's 54 form controls (every plain `<label>Text</label><input>` pair
+  outside the DCMA table) had no programmatically-associated accessible name — no `for=`/`id` pairing,
+  no `aria-label`. The second round's `aria-label` fix covered only the 14 DCMA inputs, never extended
+  to the other 40 fields using the identical unlabeled pattern it was meant to correct. Added `for=` to
+  all 40 labels, pairing each to its control's real id — confirmed live that `element.labels` now
+  resolves for every affected field and the page-wide unnamed-control sweep returns zero.
+
+Added a dedicated `stress.cjs` regression check for each defect, including a WCAG contrast calculator
+run directly against the CSS token values (the specific gap this round's own contrast finding called
+out — "stress.cjs has no CSS/contrast assertions") and a structural `<label for=>`/`id=` audit, both
+new categories of check for this file.
 
 Pushed and public: [tjaiyen/manufacturing-project-controls-command-center](https://github.com/tjaiyen/manufacturing-project-controls-command-center),
 live at https://tjaiyen.github.io/manufacturing-project-controls-command-center/.

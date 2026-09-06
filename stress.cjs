@@ -33,6 +33,48 @@ check(html.includes('role="tablist"') && html.includes('aria-orientation="vertic
 check(html.includes("Every dollar figure, date, and site name on this page is a"), "the top-level illustrative-data disclaimer is present");
 check(html.includes('robots" content="noindex,nofollow"'), "page is noindex,nofollow");
 
+console.log("--- Accessibility: label association + WCAG AA tag contrast ---");
+// 40 of 54 form controls (every plain <label>Text</label><input> pair outside the DCMA table) had no
+// programmatically-associated accessible name -- no for=/id pairing and no aria-label/aria-labelledby.
+// stress.cjs's DOM stub has no <label>-to-<input> association model (documented accepted limitation),
+// so this is a structural check on the raw markup rather than a DOM `.labels` assertion.
+const labelTags = [...html.matchAll(/<label\b[^>]*>/g)].map((m) => m[0]);
+check(labelTags.length === 40, "found the expected number of <label> elements to check (pre-registered by grep before this check was written)", labelTags.length);
+const labelsWithFor = labelTags.filter((t) => /\bfor="[^"]+"/.test(t));
+check(labelsWithFor.length === labelTags.length, "every <label> on the page carries a for= attribute pairing it to a real control (previously all 40 were bare siblings with zero accessible name)", `${labelsWithFor.length}/${labelTags.length}`);
+const danglingForTargets = labelTags.filter((t) => {
+  const m = t.match(/\bfor="([^"]+)"/);
+  if (!m) return true;
+  return !new RegExp(`id="${m[1]}"`).test(html);
+});
+check(danglingForTargets.length === 0, "every label's for= id matches a real id= elsewhere on the page (no dangling reference)", JSON.stringify(danglingForTargets));
+
+// WCAG AA contrast: the .tag badge class renders rgb(var(--c-accent)) text on a 15%-opacity tint of
+// the same color over the white light-theme card background. The prior stress-test round darkened
+// --c-success/--c-warning/--c-danger for the identical class of bug but never touched --c-accent,
+// which this separate, very widely-used component (~24 badges incl. #verifyBadge) still relied on.
+// Contrast math (WCAG relative luminance) run directly against the light-theme token values below --
+// same formula used to confirm this live in a browser -- rather than a getComputedStyle assertion,
+// since this DOM stub never renders CSS.
+function srgbToLinear(c) { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+function relLuminance([r, g, b]) { return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b); }
+function contrastRatio(rgbA, rgbB) {
+  const lA = relLuminance(rgbA), lB = relLuminance(rgbB);
+  const lighter = Math.max(lA, lB), darker = Math.min(lA, lB);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+const lightAccentMatches = [...html.matchAll(/--c-bg-primary:248 249 252;[\s\S]{0,300}?--c-accent:(\d+) (\d+) (\d+);/g)]
+  .map((m) => [Number(m[1]), Number(m[2]), Number(m[3])]);
+check(lightAccentMatches.length === 2, "found both light-theme --c-accent token declarations to check (the prefers-color-scheme block and the explicit data-theme=\"light\" block)", JSON.stringify(lightAccentMatches));
+check(lightAccentMatches.every((rgb) => JSON.stringify(rgb) === JSON.stringify(lightAccentMatches[0])), "both light-theme --c-accent declarations agree with each other", JSON.stringify(lightAccentMatches));
+if (lightAccentMatches.length > 0) {
+  const accent = lightAccentMatches[0];
+  const white = [255, 255, 255];
+  const tagBg = accent.map((c, i) => c * 0.15 + white[i] * 0.85); // .tag's rgb(var(--c-accent)/.15) over a white card
+  const ratio = contrastRatio(accent, tagBg);
+  check(ratio >= 4.5, "the .tag badge's light-theme text/background contrast meets the WCAG AA 4.5:1 minimum for normal-size text (previously 3.98:1)", ratio.toFixed(3));
+}
+
 console.log("--- Fabrication guard: confirmed-wrong claims never asserted as fact ---");
 // This dashboard exists specifically to CORRECT these claims -- they must appear only inside the
 // correction cards that name them to reject them, never asserted bare as if true.
@@ -216,6 +258,22 @@ check(JSON.stringify(sandbox.DCMA_CHECKS.map((c) => c.name)) === JSON.stringify(
 check(elements.dcmaPassRateOut.textContent === "11/14 (78.57%)", "rendered DCMA pass-rate text matches golden value (3 checks fail with the seeded defaults: Lags, High Float, CPLI)", elements.dcmaPassRateOut.textContent);
 check((elements.dcmaBody.innerHTML.match(/status-pill green/g) || []).length === 11, "exactly 11 of 14 rendered DCMA rows show a green (pass) status pill", (elements.dcmaBody.innerHTML.match(/status-pill green/g) || []).length);
 check((elements.dcmaBody.innerHTML.match(/status-pill red/g) || []).length === 3, "exactly 3 of 14 rendered DCMA rows show a red (fail) status pill", (elements.dcmaBody.innerHTML.match(/status-pill red/g) || []).length);
+// Regression guard for a real focus-loss bug: renderDcma() rebuilds dcmaBody's ENTIRE innerHTML on
+// every edit, which in a real browser destroys and recreates every input node -- moving focus to
+// <body> mid-edit and dropping any further keystrokes of that edit. This DOM stub caches elements by
+// id (it never models real node destruction, per the README's own accepted-limitation note on this
+// re-render path), so it can't reproduce the focus-loss itself -- but it CAN prove the fix's actual
+// mechanism fires: renderDcma() now captures document.activeElement before rebuilding and calls
+// .focus() on the same id afterward. Simulate a user having focused one DCMA input, then re-render
+// and confirm that field's .focus() gets invoked again (pre-registered: 0 calls without the fix, >=1
+// with it -- verified by reverting the fix locally and re-running before this check was kept).
+elements.dcma_lagsPct.focus();
+let dcmaRefocusCalls = 0;
+const originalDcmaLagsFocus = elements.dcma_lagsPct.focus;
+elements.dcma_lagsPct.focus = function () { dcmaRefocusCalls++; return originalDcmaLagsFocus.apply(this, arguments); };
+sandbox.renderDcma();
+elements.dcma_lagsPct.focus = originalDcmaLagsFocus;
+check(dcmaRefocusCalls >= 1, "renderDcma() explicitly re-focuses the previously-focused DCMA input after rebuilding dcmaBody's innerHTML, restoring the edit point a real browser would otherwise drop", dcmaRefocusCalls);
 const cc = sandbox.calcCriticalChain();
 check(cc.status === "amber", "Critical Chain fever status matches golden value (55% consumed vs 50% complete -- within the 10-point amber band)", cc.status);
 const takt = sandbox.calcTakt();
@@ -235,6 +293,24 @@ check(Math.abs(evm.EAC3 - 52067901.2345679) < 0.01, "EAC-3 (cost+schedule weight
 check(evm.EAC4 === 47000000, "EAC-4 (bottom-up ETC) matches golden value", evm.EAC4);
 check(Math.abs(evm.spreadPct - 12.817558299039785) < 1e-6, "EAC spread as % of BAC matches golden value, and correctly exceeds the 10% materiality flag", evm.spreadPct);
 check(elements.eacSpreadFlag.textContent.includes("Spread exceeds 10%"), "the materiality flag correctly fires given the golden 12.8% spread", elements.eacSpreadFlag.textContent);
+// Regression guard for a real bug: AC previously defaulted to 1 (not 0) on an empty/cleared field via
+// `parseFloat(...) || 1` -- unlike every other calcEvm() field, and unlike SPI's own explicit
+// PV !== 0 guard -- silently treating a blank AC as if $1 had been spent. That corrupted CPI (and
+// every EAC/TCPI that divides by it) into a division artifact instead of an honest zero. Pre-
+// registered by hand: with AC cleared and every other input left at its default (BAC=45000000,
+// EV=16200000, PV=18000000), CPI/EAC-2/EAC-3/TCPI(EAC) should all collapse to the guarded 0 -- the
+// same "honest zero" SPI already returns for a zero PV -- not a division-by-near-zero number, and CV
+// should read exactly EV (not EV minus a phantom $1).
+elements.evmAc.value = "";
+const evmClearedAc = sandbox.calcEvm();
+check(evmClearedAc.CPI === 0, "clearing AC guards CPI to 0 instead of dividing by the old phantom AC=1 default", evmClearedAc.CPI);
+check(evmClearedAc.EAC2 === 0, "clearing AC guards EAC-2 to 0 instead of collapsing to a tiny nonsense dollar figure", evmClearedAc.EAC2);
+check(evmClearedAc.EAC3 === 0, "clearing AC guards EAC-3 to 0 instead of collapsing to a tiny nonsense dollar figure", evmClearedAc.EAC3);
+check(evmClearedAc.TCPI_EAC === 0, "clearing AC guards TCPI(EAC) to 0 rather than a divide-by-near-zero artifact", evmClearedAc.TCPI_EAC);
+check(evmClearedAc.CV === 16200000, "clearing AC is treated as an honest 0, so CV = EV - 0 = EV exactly (not EV - 1)", evmClearedAc.CV);
+elements.evmAc.value = DEFAULTS.evmAc; // restore before any later check relies on the golden default
+const evmRestored = sandbox.calcEvm();
+check(Math.abs(evmRestored.CPI - 0.9257142857142857) < 1e-9, "restoring AC to its default reproduces the original golden CPI (state fully restored after the edge-case check)", evmRestored.CPI);
 
 console.log("--- Quality, Yield & Risk: golden values ---");
 const qsra = sandbox.calcQsra();
@@ -243,6 +319,27 @@ check(Math.abs(qsra.p80 - 237.54018609712512) < 1e-6, "QSRA P80 matches golden v
 check(Math.abs(qsra.p95 - 254.20217116947586) < 1e-6, "QSRA P95 matches golden value", qsra.p95);
 const qsraRun2 = sandbox.calcQsra();
 check(qsra.p50 === qsraRun2.p50 && qsra.p95 === qsraRun2.p95, "calling calcQsra() twice with the same inputs reproduces identical results (deterministic seeded PRNG, not Math.random())", `run1=${qsra.p50}/${qsra.p95} run2=${qsraRun2.p50}/${qsraRun2.p95}`);
+// Regression guard for a real bug: triangularSample()'s inverse-CDF formula assumes Min <= Mode <=
+// Max, but calcQsra() never validated that ordering before this fix -- an inverted Min/Max (e.g. the
+// Optimistic and Pessimistic fields swapped) fed the sampler bounds it was never designed for and
+// produced percentiles entirely outside either reading of the envelope, with no warning shown.
+// Pre-registered by hand using the finding's own repro (qsraMin=270, qsraMode=210, qsraMax=180 --
+// Min/Max swapped): the fix must refuse to run the simulation and report an honest invalid state
+// instead of 5000 out-of-envelope samples.
+elements.qsraMin.value = "270";
+elements.qsraMode.value = "210";
+elements.qsraMax.value = "180";
+const qsraInvalidOrder = sandbox.calcQsra();
+const qsraInvalidOrderSummary = `p50=${qsraInvalidOrder.p50} p80=${qsraInvalidOrder.p80} p95=${qsraInvalidOrder.p95} samples=${qsraInvalidOrder.samples.length} invalidOrder=${qsraInvalidOrder.invalidOrder}`;
+check(qsraInvalidOrder.invalidOrder === true, "an inverted Min/Max (270/210/180) is flagged invalidOrder instead of silently sampling", qsraInvalidOrderSummary);
+check(qsraInvalidOrder.p50 === null && qsraInvalidOrder.samples.length === 0, "an inverted Min/Max produces no Monte Carlo samples at all, rather than 5000 samples outside the stated envelope", qsraInvalidOrderSummary);
+check(elements.qsraOrderFlag.textContent.length > 0, "a visible validation message is shown for the inverted Min/Max case (previously nothing was shown anywhere on the page)", elements.qsraOrderFlag.textContent);
+check(elements.qsraP50Out.textContent === "— days", "the P50 KPI reads an honest placeholder instead of a fabricated day count (previously rendered \"300.2 days\", exceeding every entered number)", elements.qsraP50Out.textContent);
+elements.qsraMin.value = DEFAULTS.qsraMin;
+elements.qsraMode.value = DEFAULTS.qsraMode;
+elements.qsraMax.value = DEFAULTS.qsraMax;
+const qsraRestored = sandbox.calcQsra();
+check(qsraRestored.invalidOrder === false && Math.abs(qsraRestored.p50 - 218.21812316737456) < 1e-6, "restoring Min/Mode/Max to their defaults reproduces the original golden P50 (state fully restored after the edge-case check)", qsraRestored.p50);
 check(typeof sandbox.actionPriority === "function", "window.actionPriority is exposed as a function");
 check(sandbox.actionPriority(9, 3, 4) === "High", "a severity-9 failure is Action-Priority HIGH even with low RPN (108) -- exactly the case RPN alone would under-rank", sandbox.actionPriority(9, 3, 4));
 check(sandbox.actionPriority(3, 8, 8) === "Low", "a low-severity, high-RPN (192) failure is Action-Priority LOW -- exactly the case a naive RPN threshold would over-rank", sandbox.actionPriority(3, 8, 8));
