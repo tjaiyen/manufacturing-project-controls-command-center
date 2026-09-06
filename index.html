@@ -1,0 +1,1142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Manufacturing Project Controls Command Center</title>
+<style>
+  :root{
+    --c-bg-primary:10 15 29; --c-bg-surface:15 21 38; --c-bg-card:19 26 46;
+    --c-text-primary:230 235 245; --c-text-secondary:150 160 180;
+    --c-line:255 255 255; --c-accent:88 166 255; --c-success:63 185 128;
+    --c-warning:230 170 60; --c-danger:240 100 100;
+  }
+  @media (prefers-color-scheme:light){
+    :root:not([data-theme="dark"]){
+      --c-bg-primary:248 249 252; --c-bg-surface:255 255 255; --c-bg-card:255 255 255;
+      --c-text-primary:20 25 40; --c-text-secondary:90 100 120;
+      --c-line:0 0 0; --c-accent:20 110 220; --c-success:20 140 90;
+      --c-warning:180 120 10; --c-danger:200 50 50;
+    }
+  }
+  :root[data-theme="dark"]{
+    --c-bg-primary:10 15 29; --c-bg-surface:15 21 38; --c-bg-card:19 26 46;
+    --c-text-primary:230 235 245; --c-text-secondary:150 160 180;
+    --c-line:255 255 255; --c-accent:88 166 255; --c-success:63 185 128;
+    --c-warning:230 170 60; --c-danger:240 100 100;
+  }
+  :root[data-theme="light"]{
+    --c-bg-primary:248 249 252; --c-bg-surface:255 255 255; --c-bg-card:255 255 255;
+    --c-text-primary:20 25 40; --c-text-secondary:90 100 120;
+    --c-line:0 0 0; --c-accent:20 110 220; --c-success:20 140 90;
+    --c-warning:180 120 10; --c-danger:200 50 50;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:rgb(var(--c-bg-primary));color:rgb(var(--c-text-primary));
+    font:14.5px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  code,.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+  a{color:rgb(var(--c-accent))}
+  h1{font-size:22px;margin:0 0 6px}
+  h2{font-size:15px;margin:0}
+  .lede{color:rgb(var(--c-text-secondary));font-size:13px;max-width:820px;margin:0 0 18px}
+  .banner{background:rgb(var(--c-warning)/.1);border:1px solid rgb(var(--c-warning)/.4);border-radius:10px;
+    padding:14px 18px;margin-bottom:20px;font-size:12.5px;color:rgb(var(--c-text-secondary))}
+  .card{border:1px solid rgb(var(--c-line)/.12);border-radius:10px;padding:16px 18px;margin-bottom:16px;background:rgb(var(--c-bg-card))}
+  .card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .card-head h2{min-width:0}
+  .tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;background:rgb(var(--c-accent)/.15);color:rgb(var(--c-accent));font-family:ui-monospace,Menlo,monospace}
+  .grid{display:grid;gap:16px}
+  .grid.cols-2{grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr))}
+  .grid.cols-3{grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}
+  .grid.cols-4{grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr))}
+  .field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+  .field label{font-size:11px;color:rgb(var(--c-text-secondary))}
+  .field input,.field select{background:rgb(var(--c-bg-primary));border:1px solid rgb(var(--c-line)/.25);color:inherit;
+    padding:7px 10px;border-radius:6px;font-family:inherit;font-size:13px}
+  .field-row{display:flex;gap:10px;flex-wrap:wrap}
+  .field-row .field{flex:1;min-width:min(140px,100%)}
+  .kpi{border:1px solid rgb(var(--c-line)/.12);border-radius:10px;padding:14px;background:rgb(var(--c-bg-card))}
+  .kpi .label{font-size:11px;color:rgb(var(--c-text-secondary));margin-bottom:6px}
+  .kpi .value{font-size:22px;font-weight:700;font-family:ui-monospace,Menlo,monospace}
+  .status-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
+  .status-pill.green{background:rgb(var(--c-success)/.15);color:rgb(var(--c-success))}
+  .status-pill.amber{background:rgb(var(--c-warning)/.15);color:rgb(var(--c-warning))}
+  .status-pill.red{background:rgb(var(--c-danger)/.15);color:rgb(var(--c-danger))}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid rgb(var(--c-line)/.1)}
+  th{color:rgb(var(--c-text-secondary));font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.02em}
+  .tblwrap{overflow-x:auto}
+  .srctag{font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:4px;margin-right:6px;font-family:ui-monospace,Menlo,monospace}
+  .srctag.real{background:rgb(var(--c-success)/.15);color:rgb(var(--c-success))}
+  .srctag.illustrative{background:rgb(var(--c-warning)/.15);color:rgb(var(--c-warning))}
+  .srctag.corrected{background:rgb(var(--c-danger)/.15);color:rgb(var(--c-danger))}
+  .srclist{list-style:none;margin:0;padding:0}
+  .srclist li{padding:7px 0;border-bottom:1px solid rgb(var(--c-line)/.08);font-size:12.5px;color:rgb(var(--c-text-secondary))}
+
+  /* ---------- App shell / vertical side nav (matching sibling dashboards) ---------- */
+  .app-shell{display:flex;min-height:100vh;align-items:flex-start}
+  .sidenav{flex:none;width:236px;background:rgb(var(--c-bg-surface));border-right:1px solid rgb(var(--c-line)/.1);
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .sidenav-head{padding:14px 14px 10px;border-bottom:1px solid rgb(var(--c-line)/.1)}
+  .sidenav-head b{display:block;font-size:12.5px;font-weight:700;line-height:1.3}
+  .sidenav-head small{display:block;font:400 10px/1.3 ui-monospace,Menlo,monospace;color:rgb(var(--c-text-secondary));margin-top:2px}
+  .sidenav-list{list-style:none;margin:0;padding:8px;display:flex;flex-direction:column;gap:2px;flex:1}
+  .sidenav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;border:none;
+    background:none;color:rgb(var(--c-text-secondary));cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;text-align:left;width:100%}
+  .sidenav-item:hover{background:rgb(var(--c-accent)/.08);color:rgb(var(--c-text-primary))}
+  .sidenav-item[aria-selected="true"]{background:rgb(var(--c-accent)/.14);color:rgb(var(--c-accent))}
+  .sidenav-footer{padding:10px;border-top:1px solid rgb(var(--c-line)/.1);display:flex;flex-direction:column;gap:6px}
+  .icobtn{display:flex;align-items:center;gap:8px;border:1px solid rgb(var(--c-line)/.2);border-radius:6px;
+    background:transparent;color:inherit;cursor:pointer;padding:6px 9px;font-size:11.5px;font-family:inherit}
+  .icobtn:hover{border-color:rgb(var(--c-accent));color:rgb(var(--c-accent))}
+  .content{flex:1;min-width:0}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 32px 60px}
+  .tabpanel{display:none}
+  .tabpanel.active{display:block}
+
+  /* Responsive floor: below 760px the fixed-width side rail would force horizontal overflow on
+     every tab (found live at 375px — .field min-widths and long card-head titles pushed the page
+     wider than the viewport). Below this floor the shell stacks vertically and the nav becomes a
+     horizontally-scrollable strip instead of a fixed-width column, matching the overflow-safe
+     pattern used throughout this dashboard family. */
+  @media (max-width:760px){
+    /* A definite-width block with overflow-x:auto + white-space:nowrap + inline-block children is
+       the well-established bulletproof horizontal-scroll-strip pattern -- it sidesteps the flexbox
+       min-width/flex-shrink edge cases that let a row of unshrinkable flex items force an ancestor
+       wider than the viewport (found live at 375px: the flex-based first attempt at this still
+       leaked ~130px of overflow to the page level despite min-width:0 on every flex link in the
+       chain). display:block + inline-block children clip cleanly against a definite parent width. */
+    .app-shell{display:block}
+    .content{display:block}
+    .sidenav{display:block;width:100%;height:auto;position:static;overflow-x:auto;white-space:nowrap;
+      border-right:none;border-bottom:1px solid rgb(var(--c-line)/.1)}
+    .sidenav-head{display:inline-block;vertical-align:top;white-space:nowrap;border-bottom:none;
+      border-right:1px solid rgb(var(--c-line)/.1)}
+    .sidenav-list{display:inline-block;vertical-align:top;white-space:nowrap;padding:8px}
+    .sidenav-list li{display:inline-block}
+    .sidenav-item{white-space:nowrap}
+    .sidenav-footer{display:inline-block;vertical-align:top;white-space:nowrap;border-top:none;
+      border-left:1px solid rgb(var(--c-line)/.1)}
+    .wrap{padding:20px 16px 40px}
+  }
+
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidenav" id="sidenav">
+    <div class="sidenav-head">
+      <b>Manufacturing Project Controls</b>
+      <small>Command Center</small>
+    </div>
+    <ul class="sidenav-list" id="sidenavList" role="tablist" aria-orientation="vertical">
+      <li><button class="sidenav-item" data-tab="exec" role="tab" aria-selected="true" aria-controls="tab-exec" id="navtab-exec" tabindex="0">Executive Overview</button></li>
+      <li><button class="sidenav-item" data-tab="baseline" role="tab" aria-selected="false" aria-controls="tab-baseline" id="navtab-baseline" tabindex="-1">Baseline &amp; WBS Governance</button></li>
+      <li><button class="sidenav-item" data-tab="schedule" role="tab" aria-selected="false" aria-controls="tab-schedule" id="navtab-schedule" tabindex="-1">Schedule &amp; Constraints</button></li>
+      <li><button class="sidenav-item" data-tab="evm" role="tab" aria-selected="false" aria-controls="tab-evm" id="navtab-evm" tabindex="-1">EVM &amp; Cost Engineering</button></li>
+      <li><button class="sidenav-item" data-tab="quality" role="tab" aria-selected="false" aria-controls="tab-quality" id="navtab-quality" tabindex="-1">Quality, Yield &amp; Risk</button></li>
+      <li><button class="sidenav-item" data-tab="supply" role="tab" aria-selected="false" aria-controls="tab-supply" id="navtab-supply" tabindex="-1">Supply Chain &amp; Procurement</button></li>
+      <li><button class="sidenav-item" data-tab="change" role="tab" aria-selected="false" aria-controls="tab-change" id="navtab-change" tabindex="-1">Change &amp; Traceability</button></li>
+      <li><button class="sidenav-item" data-tab="playbook" role="tab" aria-selected="false" aria-controls="tab-playbook" id="navtab-playbook" tabindex="-1">Diagnostic Playbook</button></li>
+      <li><button class="sidenav-item" data-tab="methodology" role="tab" aria-selected="false" aria-controls="tab-methodology" id="navtab-methodology" tabindex="-1">Methodology &amp; Source Ledger</button></li>
+    </ul>
+    <div class="sidenav-footer">
+      <span class="tag" id="verifyBadge">✓ 163/163 CHECKS PASSING</span>
+      <button class="icobtn" id="themeBtn" type="button" aria-label="Toggle theme">◐ Toggle theme</button>
+    </div>
+  </nav>
+
+  <main class="content"><div class="wrap">
+
+    <div class="banner">
+      <b>Read this before anything else.</b> Every dollar figure, date, and site name on this page is a
+      synthetic worked example built to demonstrate real project-controls methodology for mission-critical,
+      multi-site manufacturing programs — it is not a claim about any real employer, program, or contract.
+      This dashboard exists to verify and correct a downloaded "AI research" document proposing 30 methods
+      and a 4-tier dashboard architecture for this domain: <b>most of the underlying methodology is real
+      and independently verified</b> (EIA-748 EVMS, DCMA 14-Point, AACE Monte Carlo risk, FMEA, Digital
+      Thread), but several specific claims were found to be imprecise, non-standard, or borrowed from a
+      different regulated industry without caveat — corrected here, not silently repeated. See the
+      Methodology tab for the full source ledger and correction log.
+    </div>
+
+    <!-- ============ TAB: EXECUTIVE OVERVIEW ============ -->
+    <section class="tabpanel active" id="tab-exec" role="tabpanel" aria-labelledby="navtab-exec">
+      <h1>Executive Overview</h1>
+      <p class="lede">Board-level view of a synthetic multi-billion-dollar, multi-site manufacturing
+        program — portfolio health, the EAC-vs-budget bridge, and the top priced risks. Illustrative
+        numbers throughout; see the Methodology tab for what's real methodology vs. invented figures.</p>
+
+      <div class="grid cols-4" style="margin-bottom:16px">
+        <div class="kpi"><div class="label">Portfolio BAC</div><div class="value" id="execBac">$0</div></div>
+        <div class="kpi"><div class="label">CPI (portfolio)</div><div class="value" id="execCpi">0.00</div></div>
+        <div class="kpi"><div class="label">SPI (portfolio)</div><div class="value" id="execSpi">0.00</div></div>
+        <div class="kpi"><div class="label">EAC spread (4-method)</div><div class="value" id="execSpread">0.0%</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Portfolio Status Matrix</h2><span class="tag">ILLUSTRATIVE</span></div>
+        <div class="tblwrap"><table>
+          <thead><tr><th>Program</th><th>Cost</th><th>Schedule</th><th>Scope</th><th>Quality</th></tr></thead>
+          <tbody id="execRagBody"></tbody>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>EAC vs. Budget Bridge</h2><span class="tag">LIVE — SEE EVM TAB</span></div>
+        <p class="lede" style="margin-bottom:8px">The same 4-method EAC triangulation computed on the
+          EVM tab, bridged from BAC. A wide spread between methods (flagged below) means the "single
+          number" EAC a status report often shows is hiding real forecast uncertainty.</p>
+        <div id="execEacBridgeWrap"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Top 5 Risks — P80 Exposure</h2><span class="tag">ILLUSTRATIVE</span></div>
+        <div class="tblwrap"><table>
+          <thead><tr><th>Risk</th><th>P50 ($)</th><th>P80 ($)</th></tr></thead>
+          <tbody id="execRiskBody"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: BASELINE & WBS GOVERNANCE ============ -->
+    <section class="tabpanel" id="tab-baseline" role="tabpanel" aria-labelledby="navtab-baseline">
+      <h1>Baseline &amp; WBS Governance</h1>
+      <p class="lede">EIA-748's real structural backbone — WBS, OBS, and the Chart of Accounts (<b
+        >not</b> "CBS": see the correction card on the Methodology tab) — plus BOM synchronization
+        between Engineering and Manufacturing.</p>
+
+      <div class="card">
+        <div class="card-head"><h2>Control Account Integrity Rate</h2><span class="tag">EIA-748 / NDIA INTENT GUIDE</span></div>
+        <p class="lede" style="margin-bottom:8px">A control account is only sound when it maps 1:1 to
+          a WBS element, an OBS owner, <b>and</b> a Chart-of-Accounts code — EIA-748 explicitly forbids
+          one control account spanning two WBS elements. Edit the counts below.</p>
+        <div class="field-row">
+          <div class="field"><label>Total control accounts</label><input type="number" id="baseTotalCA" value="8"></div>
+          <div class="field"><label>Fully 1:1 mapped (WBS+OBS+CoA)</label><input type="number" id="baseMappedCA" value="6"></div>
+        </div>
+        <div class="kpi" style="max-width:260px"><div class="label">Control Account Integrity Rate</div><div class="value" id="baseIntegrityOut">0%</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>EBOM → MBOM Synchronization</h2><span class="tag">CORRECTED — 2-TIER, NOT 3</span></div>
+        <p class="lede" style="margin-bottom:8px">The source document proposed "EBOM → MBOM → PBOM" as
+          a three-tier manufacturing lineage. Verified: <b>Planning BOM (PBOM) is an MRP demand-planning
+          construct</b> (a "super bill" for forecasting option/feature mix), not a manufacturing-execution
+          tier that follows MBOM. The real, documented lineage is EBOM → MBOM (sometimes extended by an
+          SBOM for aftermarket). Corrected here.</p>
+        <div class="field-row">
+          <div class="field"><label>EBOM line items</label><input type="number" id="baseEbomCount" value="420"></div>
+          <div class="field"><label>MBOM line items</label><input type="number" id="baseMbomCount" value="414"></div>
+          <div class="field"><label>Confirmed mismatches (part/qty/rev)</label><input type="number" id="baseBomMismatches" value="9"></div>
+        </div>
+        <div class="kpi" style="max-width:260px"><div class="label">BOM Sync Variance Count</div><div class="value" id="baseBomVarianceOut">0</div></div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: SCHEDULE & CONSTRAINTS ============ -->
+    <section class="tabpanel" id="tab-schedule" role="tabpanel" aria-labelledby="navtab-schedule">
+      <h1>Schedule &amp; Constraint Engineering</h1>
+      <p class="lede">The real DCMA 14-Point schedule health assessment (the actual 14 checks, not
+        just a claimed count), a Critical Chain buffer fever chart, and Takt-time synchronization.</p>
+
+      <div class="card">
+        <div class="card-head"><h2>DCMA 14-Point Schedule Health Assessment</h2><span class="tag">REAL — DCMA / DELTEK</span></div>
+        <div class="tblwrap"><table>
+          <thead><tr><th>#</th><th>Check</th><th>Threshold</th><th>Input</th><th>Status</th></tr></thead>
+          <tbody id="dcmaBody"></tbody>
+        </table></div>
+        <div class="kpi" style="max-width:260px;margin-top:10px"><div class="label">Overall pass rate</div><div class="value" id="dcmaPassRateOut">0/14</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Critical Chain Buffer Fever Chart</h2><span class="tag">GOLDRATT / CCPM</span></div>
+        <p class="lede" style="margin-bottom:8px">Buffer consumption plotted against % of the critical
+          chain complete — green (buffer holding), amber (watch), red (buffer burn outpacing progress).</p>
+        <div class="field-row">
+          <div class="field"><label>% critical chain complete</label><input type="number" id="ccChainComplete" value="50" step="1"></div>
+          <div class="field"><label>% project buffer consumed</label><input type="number" id="ccBufferConsumed" value="55" step="1"></div>
+        </div>
+        <div class="kpi" style="max-width:260px"><div class="label">Fever status</div><div class="value" id="ccStatusOut">—</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Takt-Time Synchronization</h2><span class="tag">LEAN / TPS — TAKT PLANNING</span></div>
+        <p class="lede" style="margin-bottom:8px">Zone-by-zone actual cycle time vs. the takt target
+          (±5% tolerance). Real, documented Lean Construction practice, not a novel cross-application.</p>
+        <div class="field-row">
+          <div class="field"><label>Takt target (seconds)</label><input type="number" id="taktTarget" value="180"></div>
+          <div class="field"><label>Zone cycle times, comma-separated</label><input type="text" id="taktZones" value="175,182,190,178,185"></div>
+        </div>
+        <div class="kpi" style="max-width:260px"><div class="label">Takt adherence %</div><div class="value" id="taktAdherenceOut">0%</div></div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: EVM & COST ENGINEERING ============ -->
+    <section class="tabpanel" id="tab-evm" role="tabpanel" aria-labelledby="navtab-evm">
+      <h1>EVM &amp; Cost Engineering</h1>
+      <p class="lede">EIA-748 core ledger (CPI/SPI/both TCPI variants) plus 4-method EAC
+        triangulation — bracketed, not collapsed into one number.</p>
+
+      <div class="grid cols-2">
+        <div class="card">
+          <div class="card-head"><h2>EVM Ledger</h2><span class="tag">EIA-748</span></div>
+          <div class="field-row">
+            <div class="field"><label>BAC ($)</label><input type="number" id="evmBac" value="45000000"></div>
+            <div class="field"><label>PV ($)</label><input type="number" id="evmPv" value="18000000"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>EV ($)</label><input type="number" id="evmEv" value="16200000"></div>
+            <div class="field"><label>AC ($)</label><input type="number" id="evmAc" value="17500000"></div>
+          </div>
+          <div class="field"><label>Bottom-up ETC for remaining work ($, for EAC method 4)</label><input type="number" id="evmEtcBottomUp" value="29500000"></div>
+          <div class="outline" style="margin-top:8px;font-size:12.5px">
+            <div>CV = EV − AC: <b class="mono" id="outCv">$0</b></div>
+            <div>SV = EV − PV: <b class="mono" id="outSv">$0</b></div>
+            <div>CPI = EV / AC: <b class="mono" id="outCpi">0.000</b></div>
+            <div>SPI = EV / PV: <b class="mono" id="outSpi">0.000</b></div>
+            <div>TCPI (to hit BAC) = (BAC−EV)/(BAC−AC): <b class="mono" id="outTcpiBac">0.000</b></div>
+            <div>TCPI (to hit current EAC) = (BAC−EV)/(EAC−AC): <b class="mono" id="outTcpiEac">0.000</b></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>4-Method EAC Triangulation</h2><span class="tag">PMBOK</span></div>
+          <div class="tblwrap"><table>
+            <thead><tr><th>Method</th><th>Assumption</th><th>EAC</th><th>VAC</th></tr></thead>
+            <tbody id="eacBody"></tbody>
+          </table></div>
+          <div class="kpi" style="margin-top:10px"><div class="label">Spread (max−min) as % of BAC</div><div class="value" id="eacSpreadOut">0.0%</div></div>
+          <p id="eacSpreadFlag" style="font-size:12px;color:rgb(var(--c-warning));margin-top:6px"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: QUALITY, YIELD & RISK ============ -->
+    <section class="tabpanel" id="tab-quality" role="tabpanel" aria-labelledby="navtab-quality">
+      <h1>Quality, Yield &amp; Risk</h1>
+      <p class="lede">QSRA Monte Carlo (real AACE 57R-09 methodology), FMEA using Action Priority
+        (the real 2019 AIAG-VDA replacement for RPN, not RPN alone), First Pass Yield, 8D/RCCA cycle
+        time, and an APQP/PPAP gate tracker that distinguishes automotive AIAG from aerospace AS9145.</p>
+
+      <div class="card">
+        <div class="card-head"><h2>QSRA — Monte Carlo Schedule Risk</h2><span class="tag">AACE 57R-09</span></div>
+        <div class="field-row">
+          <div class="field"><label>Optimistic (days)</label><input type="number" id="qsraMin" value="180"></div>
+          <div class="field"><label>Most likely (days)</label><input type="number" id="qsraMode" value="210"></div>
+          <div class="field"><label>Pessimistic (days)</label><input type="number" id="qsraMax" value="270"></div>
+        </div>
+        <div class="grid cols-3">
+          <div class="kpi"><div class="label">P50 completion</div><div class="value" id="qsraP50Out">0 days</div></div>
+          <div class="kpi"><div class="label">P80 completion</div><div class="value" id="qsraP80Out">0 days</div></div>
+          <div class="kpi"><div class="label">P95 completion</div><div class="value" id="qsraP95Out">0 days</div></div>
+        </div>
+        <p style="font-size:11px;color:rgb(var(--c-text-secondary));margin-top:8px">Seeded PRNG
+          (mulberry32) over a triangular distribution, 5,000 trials — deterministic, not
+          <code>Math.random()</code>, so the same inputs always reproduce the same percentiles.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>FMEA — Action Priority (not RPN alone)</h2><span class="tag">CORRECTED — AIAG-VDA 2019</span></div>
+        <p class="lede" style="margin-bottom:8px">The source document cited RPN (Severity × Occurrence
+          × Detection) as the integration metric. Verified: the joint AIAG-VDA FMEA Handbook (2019)
+          <b>replaced RPN with Action Priority (AP)</b> — a High/Medium/Low lookup — specifically
+          because RPN's multiplication can rate a high-severity failure as low-priority through
+          averaging. The simplified proxy logic below (severity-first, not the full 1,000-row AIAG-VDA
+          table) demonstrates the exact divergence that motivated the change.</p>
+        <div class="tblwrap"><table>
+          <thead><tr><th>Failure mode</th><th>S</th><th>O</th><th>D</th><th>RPN (legacy)</th><th>Action Priority</th></tr></thead>
+          <tbody id="fmeaBody"></tbody>
+        </table></div>
+        <p id="fmeaDivergenceNote" style="font-size:12px;color:rgb(var(--c-warning));margin-top:8px"></p>
+      </div>
+
+      <div class="grid cols-2">
+        <div class="card">
+          <div class="card-head"><h2>First Pass Yield by Site</h2><span class="tag">LEAN / SIX SIGMA</span></div>
+          <div class="tblwrap"><table>
+            <thead><tr><th>Site</th><th>FPY</th><th>Status</th></tr></thead>
+            <tbody id="fpyBody"></tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>8D / RCCA Cycle Time</h2><span class="tag">FORD 8D, 1987</span></div>
+          <div class="field-row">
+            <div class="field"><label>D1 opened (day 0 = today)</label><input type="number" id="rccaD1" value="0"></div>
+            <div class="field"><label>D3 containment (day)</label><input type="number" id="rccaD3" value="4"></div>
+            <div class="field"><label>D8 closed (day)</label><input type="number" id="rccaD8" value="32"></div>
+          </div>
+          <div class="outline" style="font-size:12.5px">
+            <div>Containment cycle time (D1→D3): <b class="mono" id="rccaContainOut">0 days</b></div>
+            <div>Total cycle time (D1→D8): <b class="mono" id="rccaTotalOut">0 days</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>APQP/PPAP Gate Tracker</h2><span class="tag">CORRECTED — AIAG ≠ AS9145</span></div>
+        <p class="lede" style="margin-bottom:8px">The source document applied automotive AIAG PPAP
+          "Level 3-5" language broadly to "mission-critical manufacturing." Verified: PPAP is
+          AIAG-automotive-native (18 elements); aerospace/defense uses the distinct, IAQG-governed
+          <b>AS9145</b> standard (11 deliverables). Pick the correct framework — don't apply automotive
+          PPAP language to an aerospace program.</p>
+        <div class="field-row">
+          <div class="field"><label>Framework</label>
+            <select id="ppapFramework">
+              <option value="aiag">Automotive — AIAG PPAP (18 elements)</option>
+              <option value="as9145">Aerospace/Defense — AS9145 (11 deliverables)</option>
+            </select>
+          </div>
+          <div class="field"><label>Elements/deliverables complete</label><input type="number" id="ppapComplete" value="14"></div>
+        </div>
+        <div class="kpi" style="max-width:260px"><div class="label">Gate completion</div><div class="value" id="ppapCompletionOut">0%</div></div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: SUPPLY CHAIN & PROCUREMENT ============ -->
+    <section class="tabpanel" id="tab-supply" role="tabpanel" aria-labelledby="navtab-supply">
+      <h1>Supply Chain &amp; Procurement</h1>
+      <p class="lede">Tier-N visibility, FAT/SAT milestone-payment gating, dual-source coverage, and a
+        correctly-named supplier scorecard — not "VPI," which verified as a non-standard, reinvented
+        term (it turns up as an unrelated proprietary label in property-management vendor scoring).</p>
+
+      <div class="grid cols-2">
+        <div class="card">
+          <div class="card-head"><h2>Tier-N Visibility Coverage</h2><span class="tag">REAL TERMINOLOGY</span></div>
+          <div class="field-row">
+            <div class="field"><label>Critical / single-source parts</label><input type="number" id="tierCriticalParts" value="42"></div>
+            <div class="field"><label>Mapped to confirmed Tier-2+ source</label><input type="number" id="tierMappedParts" value="31"></div>
+          </div>
+          <div class="kpi" style="max-width:260px"><div class="label">Sub-tier visibility coverage</div><div class="value" id="tierCoverageOut">0%</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Dual-Source Coverage</h2><span class="tag">CLASSICAL SCRM</span></div>
+          <div class="field-row">
+            <div class="field"><label>Critical parts</label><input type="number" id="dualCriticalParts" value="42"></div>
+            <div class="field"><label>Dual-sourced (qualified 2nd source)</label><input type="number" id="dualSourcedParts" value="18"></div>
+          </div>
+          <div class="kpi" style="max-width:260px"><div class="label">Dual-source coverage %</div><div class="value" id="dualCoverageOut">0%</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>FAT/SAT Milestone-Payment Gate</h2><span class="tag">IEC 62381 / ISA-105</span></div>
+        <div class="field-row">
+          <div class="field"><label>Contract value ($)</label><input type="number" id="fatContractValue" value="2400000"></div>
+          <div class="field"><label>Released at FAT (%)</label><input type="number" id="fatPct" value="20"></div>
+          <div class="field"><label>Released at SAT (%)</label><input type="number" id="satPct" value="12"></div>
+        </div>
+        <div class="tblwrap"><table>
+          <thead><tr><th>Milestone</th><th>% of contract</th><th>$ released</th></tr></thead>
+          <tbody id="fatSatBody"></tbody>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Supplier Scorecard</h2><span class="tag">CORRECTED — NOT "VPI"</span></div>
+        <div class="field-row">
+          <div class="field"><label>OTIF (%)</label><input type="number" id="scOtif" value="91.5" step="0.1"></div>
+          <div class="field"><label>Defect PPM</label><input type="number" id="scPpm" value="340"></div>
+          <div class="field"><label>Billing variance (%)</label><input type="number" id="scBilling" value="2.1" step="0.1"></div>
+        </div>
+        <div class="grid cols-3">
+          <div class="kpi"><div class="label">OTIF</div><div class="value" id="scOtifOut">0%</div></div>
+          <div class="kpi"><div class="label">Defect PPM</div><div class="value" id="scPpmOut">0</div></div>
+          <div class="kpi"><div class="label">Billing variance</div><div class="value" id="scBillingOut">0%</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: CHANGE & TRACEABILITY ============ -->
+    <section class="tabpanel" id="tab-change" role="tabpanel" aria-labelledby="navtab-change">
+      <h1>Change Governance &amp; Traceability</h1>
+      <p class="lede">ECO/ECB cycle time, Digital Thread completeness (real USAF-2013-origin
+        concept), scope-creep/REA recovery, and a Commissioning &amp; Qualification (C&amp;Q) tracker —
+        not "IQ/OQ/PQ" unless the scope is genuinely FDA/GxP-regulated (see the Methodology tab).</p>
+
+      <div class="grid cols-2">
+        <div class="card">
+          <div class="card-head"><h2>ECO Cycle Time</h2><span class="tag">PLM / ECB</span></div>
+          <div class="field"><label>ECO cycle times, days, comma-separated</label><input type="text" id="ecoCycleTimes" value="6,11,8,14,7,10"></div>
+          <div class="kpi" style="max-width:260px"><div class="label">Average ECO cycle time</div><div class="value" id="ecoAvgOut">0 days</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Digital Thread Completeness</h2><span class="tag">USAF, 2013 ORIGIN</span></div>
+          <div class="field-row">
+            <div class="field"><label>Serialized units shipped</label><input type="number" id="dtUnits" value="1200"></div>
+            <div class="field"><label>Units with complete as-designed→as-built→as-tested record</label><input type="number" id="dtComplete" value="1092"></div>
+          </div>
+          <div class="kpi" style="max-width:260px"><div class="label">Digital Thread completeness</div><div class="value" id="dtCompletenessOut">0%</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Scope Creep &amp; REA Recovery</h2><span class="tag">FAR CHANGES CLAUSE</span></div>
+        <div class="field-row">
+          <div class="field"><label>Customer-directed scope change ($)</label><input type="number" id="scopeCustomerDirected" value="340000"></div>
+          <div class="field"><label>Contractor-caused rework, non-recoverable ($)</label><input type="number" id="scopeContractorRework" value="95000"></div>
+          <div class="field"><label>REA $ recovered</label><input type="number" id="scopeReaRecovered" value="298000"></div>
+        </div>
+        <div class="kpi" style="max-width:260px"><div class="label">REA recovery rate</div><div class="value" id="reaRecoveryOut">0%</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Commissioning &amp; Qualification (C&amp;Q) Tracker</h2><span class="tag">CORRECTED — NOT "IQ/OQ/PQ"</span></div>
+        <p class="lede" style="margin-bottom:8px">The source document applied FDA/GxP-native "IQ/OQ/PQ"
+          language to general industrial machinery and clean-utility commissioning. Verified: IQ/OQ/PQ
+          is rooted in 21 CFR §211.63 (pharma/biotech/medical device); even semiconductor-industry
+          guides admit they're borrowing "the pharmaceutical industry's 3Q framework." Non-regulated
+          industrial commissioning uses <b>Commissioning &amp; Qualification (C&amp;Q)</b> or FAT/SAT
+          terminology instead (ISPE Baseline Guide Vol. 5) — reserve IQ/OQ/PQ for genuinely
+          FDA-regulated scope.</p>
+        <div class="field-row">
+          <div class="field"><label>Total protocols</label><input type="number" id="cqTotal" value="24"></div>
+          <div class="field"><label>Signed off</label><input type="number" id="cqSignedOff" value="19"></div>
+        </div>
+        <div class="kpi" style="max-width:260px"><div class="label">C&amp;Q completion</div><div class="value" id="cqCompletionOut">0%</div></div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: DIAGNOSTIC PLAYBOOK ============ -->
+    <section class="tabpanel" id="tab-playbook" role="tabpanel" aria-labelledby="navtab-playbook">
+      <h1>Diagnostic Playbook</h1>
+      <p class="lede">The remaining methods from the source document that don't get a dedicated live
+        calculator above — each tagged with its verification status. Real methods are cited; corrected
+        or unverified claims are marked and explained, never silently repeated as fact.</p>
+      <div id="pbList"></div>
+    </section>
+
+    <!-- ============ TAB: METHODOLOGY & SOURCE LEDGER ============ -->
+    <section class="tabpanel" id="tab-methodology" role="tabpanel" aria-labelledby="navtab-methodology">
+      <h1>Methodology &amp; Source Ledger</h1>
+      <p class="lede">This dashboard exists to verify a downloaded "AI research" document proposing 30
+        project-controls methods and a 4-tier dashboard architecture for mission-critical, multi-site
+        manufacturing programs — via 7 independent research passes, each requiring ≥2 corroborating
+        sources and a disconfirming search before accepting a claim. Verified 2026-09-05.</p>
+
+      <div class="card">
+        <div class="card-head"><h2>A cross-cutting pattern: borrowed regulated-industry vocabulary</h2></div>
+        <p style="font-size:12.5px;color:rgb(var(--c-text-secondary))">The single most important
+          finding of this verification pass: three independent research agents, working on unrelated
+          sections of the document, each found the <b>same class of error</b> — specific compliance
+          vocabulary borrowed from one regulated industry and applied broadly to "mission-critical
+          manufacturing" without caveat. <b>APQP/PPAP</b> is AIAG-automotive-native (18 elements);
+          aerospace uses the distinct AS9145 standard (11 deliverables) — not raw PPAP.
+          <b>IQ/OQ/PQ</b> is FDA/pharma-GxP-native (21 CFR §211.63); even semiconductor-industry
+          guides admit borrowing "the pharmaceutical industry's 3Q framework." <b>Common Data
+          Environment (CDE)</b> is construction/BIM-native (ISO 19650) — no evidence of genuine
+          manufacturing/PLM usage was found; the real manufacturing-native term is "digital thread" or
+          "unified data environment." Each is corrected on its own tab, not silently repeated here.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Confirmed corrections (not silently repeated as fact)</h2></div>
+        <ul class="srclist">
+          <li><span class="srctag corrected">CORRECTED</span> "CBS" is not a real EVMS pillar term — the actual fourth structural element alongside WBS/OBS is the <b>Chart of Accounts</b> (NDIA/EIA-748 Intent Guide).</li>
+          <li><span class="srctag corrected">CORRECTED</span> "EBOM → MBOM → PBOM" is not a real 3-tier manufacturing lineage — Planning BOM (PBOM) is an MRP demand-planning construct ("super bill"), not a manufacturing-execution tier after MBOM.</li>
+          <li><span class="srctag corrected">CORRECTED</span> "WIP Value-at-Risk" is not an established named practice — a plausible-sounding document-authored synthesis of three separately-real concepts (VaR, WIP aging, scrap risk).</li>
+          <li><span class="srctag corrected">CORRECTED</span> "Vendor Performance Indexing (VPI)" is not a standardized named metric — it appears as an unrelated proprietary term in property-management vendor scoring, confirming it is reinvented per-organization, not an industry standard. The correctly-named metrics are OTIF %, Defect PPM, and Billing Variance %.</li>
+          <li><span class="srctag corrected">CORRECTED</span> RPN (Severity × Occurrence × Detection) was replaced by Action Priority (AP) in the joint AIAG-VDA FMEA Handbook (2019) specifically because RPN's multiplication can rate a high-severity failure as low-priority — this dashboard's FMEA tab uses AP, not RPN alone.</li>
+          <li><span class="srctag corrected">CORRECTED</span> The document's own dashboard "Level 1-4" numbering collides with (but does not match) <b>both</b> ISA-95's real Level 0-4 automation hierarchy and ISA-101's separate Level 1-4 HMI hierarchy — three different schemes share the same numbers in the same domain. This dashboard's tab names deliberately avoid "Level 1-4" language for this reason.</li>
+          <li><span class="srctag corrected">CORRECTED</span> "Under three clicks" drill-down is the specific, 20+-year-old <b>debunked</b> UX myth (Porter 2003: no drop-off in success/satisfaction after 3 clicks, users click 25+ times without friction when they feel they're making progress; Nielsen: changing a design from 3 to 4 clicks <i>increased</i> conversion 600%). Not used as a design requirement here.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Confirmed real, with a materiality caveat</h2></div>
+        <ul class="srclist">
+          <li><span class="srctag real">REAL</span>, contested: "Zero tolerance for negative float" is real DCMA-audit-threshold language (DCMA Check #7), but is contested in practitioner literature as a rigid policy that can mask root causes in complex schedules rather than fix them.</li>
+          <li><span class="srctag real">REAL</span>, optimistic: "Daily/automated end-of-day EVMS" refresh is not standard practice at multi-billion-dollar program scale — real ANSI/EIA-748 cadence is monthly; cost-accrual lag is the specific structural reason EVM cannot be genuinely daily. This independently reconfirms, in a different domain, an identical finding from an earlier manufacturing-cost-KPI research pass this session.</li>
+          <li><span class="srctag real">REAL</span>, thin evidence for the broader grouping: multi-site tooling/equipment leveling is strongly evidenced for autoclaves specifically (real, peer-reviewed aerospace-composite scheduling literature — genuine $1-5M capital bottleneck economics) but thin for grouping CNCs/metrology rigs/calibration chambers into the same claim.</li>
+          <li><span class="srctag real">REAL</span>, often over-claimed: "digital twin" multi-tier supply-chain visibility has real leading-edge case studies (Ford, JD.com) but a 2024 peer-reviewed study found only ~16% of self-labeled "digital twins" achieve true closed-loop capability — most are rebranded monitoring dashboards.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Source Ledger — verified real methodology, correctly described</h2></div>
+        <ul class="srclist">
+          <li><span class="srctag real">REAL</span> ANSI/EIA-748 EVMS, and the CPI/SPI/TCPI (both variants)/EAC formulas used throughout this dashboard — checked exactly against PMBOK-aligned sourcing, no corrections needed.</li>
+          <li><span class="srctag real">REAL</span> DCMA 14-Point Schedule Health Assessment — the actual 14 named checks (Logic, Leads, Lags, Relationship Types, Hard Constraints, High Float, Negative Float, High Duration, Invalid Dates, Resources, Missed Tasks, Critical Path Test, CPLI, BEI).</li>
+          <li><span class="srctag real">REAL</span> Critical Chain Project Management / buffer management — Eliyahu Goldratt, <i>Critical Chain</i> (1997), Theory of Constraints lineage.</li>
+          <li><span class="srctag real">REAL</span> Takt time and Takt Planning applied to project milestone turnover — genuine Lean Construction practice (Toyota Production System lineage), not a novel cross-application.</li>
+          <li><span class="srctag real">REAL</span> QSRA/QCRA Monte Carlo simulation — AACE International Recommended Practice 57R-09.</li>
+          <li><span class="srctag real">REAL</span> Digital Thread — originated in a 2013 USAF "Global Horizons" report; as-designed/as-built/as-tested serialized traceability is documented current aerospace/defense practice.</li>
+          <li><span class="srctag real">REAL</span> FAT/SAT (Factory/Site Acceptance Testing) tied to milestone payments — codified in IEC 62381:2024 / ISA-105; real-world payment splits commonly 15-25% at FAT, 10-15% at SAT.</li>
+          <li><span class="srctag real">REAL</span> Tier-1/Tier-2/raw-material supply-chain terminology, dual-sourcing as a classical supply-chain-risk-management practice.</li>
+          <li><span class="srctag real">REAL</span> "Scope creep" (PMI-documented) and the FAR-Changes-Clause-grounded practice of separating customer-directed scope changes from contractor-caused rework for equitable-adjustment recovery.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Status</h2></div>
+        <p style="font-size:12.5px;color:rgb(var(--c-text-secondary))">Built 2026-09-06 in direct
+          response to a downloaded "Domain: Project Control in Manufacturing Environments" document,
+          verified via 7 parallel research passes plus a structural survey of the sibling
+          <code>project-controls-command-center</code> repo (which already implements the construction
+          domain's version of most of this methodology, at 4,109 passing stress checks — this
+          dashboard is deliberately scoped to the manufacturing-specific concepts that repo does not
+          and should not cover, per its own construction-domain focus). Run: <code>node stress.cjs</code>
+          — see the verify badge for the current count.</p>
+      </div>
+    </section>
+
+  </div></main>
+</div>
+<script>
+(function(){
+  "use strict";
+  // ---------- Theme ----------
+  var themeBtn = document.getElementById('themeBtn');
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    try{ localStorage.setItem('mpc-cc-theme', t); }catch(e){}
+  }
+  themeBtn.addEventListener('click', function(){
+    var cur = document.documentElement.getAttribute('data-theme');
+    applyTheme(cur === 'dark' ? 'light' : 'dark');
+  });
+  (function initTheme(){
+    var stored = null;
+    try{ stored = localStorage.getItem('mpc-cc-theme'); }catch(e){}
+    if (stored) applyTheme(stored);
+  })();
+
+  // ---------- Tabs (WAI-ARIA vertical Tabs pattern) ----------
+  var navTabs = Array.prototype.slice.call(document.querySelectorAll('.sidenav-item[role="tab"]'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.tabpanel'));
+  function activateTab(name, opts){
+    var focusToo = !opts || opts.focus !== false;
+    navTabs.forEach(function(b){
+      var on = b.getAttribute('data-tab') === name;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.setAttribute('tabindex', on ? '0' : '-1');
+      if (on && focusToo) b.focus();
+    });
+    panels.forEach(function(p){ p.classList.toggle('active', p.id === 'tab-' + name); });
+  }
+  window.activateTab = activateTab;
+  navTabs.forEach(function(b){ b.addEventListener('click', function(){ activateTab(b.getAttribute('data-tab'), { focus: false }); }); });
+  var sidenavList = document.getElementById('sidenavList');
+  sidenavList.addEventListener('keydown', function(ev){
+    var currentIndex = navTabs.findIndex(function(b){ return b.getAttribute('tabindex') === '0'; });
+    if (currentIndex === -1) currentIndex = 0;
+    var nextIndex = null;
+    if (ev.key === 'ArrowDown') nextIndex = (currentIndex + 1) % navTabs.length;
+    else if (ev.key === 'ArrowUp') nextIndex = (currentIndex - 1 + navTabs.length) % navTabs.length;
+    else if (ev.key === 'Home') nextIndex = 0;
+    else if (ev.key === 'End') nextIndex = navTabs.length - 1;
+    if (nextIndex !== null){
+      ev.preventDefault();
+      activateTab(navTabs[nextIndex].getAttribute('data-tab'));
+    }
+  });
+
+  function fmtMoney(v){ var sign = v < 0 ? '-' : (v > 0 ? '+' : ''); return sign + '$' + Math.abs(Math.round(v)).toLocaleString(); }
+  function pctStr(v, d){ return v.toFixed(d === undefined ? 1 : d) + '%'; }
+  function statusOf(pct, greenAt, amberAt){ return pct >= greenAt ? 'green' : (pct >= amberAt ? 'amber' : 'red'); }
+  function pill(status){ return '<span class="status-pill ' + status + '">' + status.toUpperCase() + '</span>'; }
+
+  // ---------- Baseline & WBS Governance ----------
+  function calcControlAccountIntegrity(){
+    var total = parseFloat(document.getElementById('baseTotalCA').value) || 0;
+    var mapped = parseFloat(document.getElementById('baseMappedCA').value) || 0;
+    var rate = total > 0 ? (mapped / total) * 100 : 0;
+    document.getElementById('baseIntegrityOut').textContent = pctStr(rate, 2);
+    return { total: total, mapped: mapped, rate: rate };
+  }
+  window.calcControlAccountIntegrity = calcControlAccountIntegrity;
+  ['baseTotalCA', 'baseMappedCA'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcControlAccountIntegrity); });
+
+  function calcBomSync(){
+    var ebom = parseFloat(document.getElementById('baseEbomCount').value) || 0;
+    var mbom = parseFloat(document.getElementById('baseMbomCount').value) || 0;
+    var mismatches = parseFloat(document.getElementById('baseBomMismatches').value) || 0;
+    document.getElementById('baseBomVarianceOut').textContent = mismatches.toString();
+    return { ebom: ebom, mbom: mbom, mismatches: mismatches };
+  }
+  window.calcBomSync = calcBomSync;
+  ['baseEbomCount', 'baseMbomCount', 'baseBomMismatches'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcBomSync); });
+
+  // ---------- Schedule & Constraint Engineering ----------
+  var DCMA_CHECKS = [
+    { n: 1, name: 'Logic', threshold: '≤5% missing predecessor/successor links', key: 'logicGapPct', dir: 'le', limit: 5 },
+    { n: 2, name: 'Leads', threshold: '0% negative lag', key: 'leadsPct', dir: 'le', limit: 0 },
+    { n: 3, name: 'Lags', threshold: '≤5% positive lag', key: 'lagsPct', dir: 'le', limit: 5 },
+    { n: 4, name: 'Relationship Types', threshold: '≥90% Finish-to-Start', key: 'fsPct', dir: 'ge', limit: 90 },
+    { n: 5, name: 'Hard Constraints', threshold: '≤5% of all constraints', key: 'hardConstraintPct', dir: 'le', limit: 5 },
+    { n: 6, name: 'High Float', threshold: '≤5% of incomplete tasks', key: 'highFloatPct', dir: 'le', limit: 5 },
+    { n: 7, name: 'Negative Float', threshold: '0 tasks', key: 'negFloatCount', dir: 'le', limit: 0 },
+    { n: 8, name: 'High Duration', threshold: '≤5% of tasks >44 working days', key: 'highDurationPct', dir: 'le', limit: 5 },
+    { n: 9, name: 'Invalid Dates', threshold: '0 tolerance', key: 'invalidDatesCount', dir: 'le', limit: 0 },
+    { n: 10, name: 'Resources', threshold: '100% resource-loaded', key: 'resourceLoadedPct', dir: 'ge', limit: 100 },
+    { n: 11, name: 'Missed Tasks', threshold: '<5%', key: 'missedTasksPct', dir: 'lt', limit: 5 },
+    { n: 12, name: 'Critical Path Test', threshold: 'logic-integrity check passes', key: 'cpTestPass', dir: 'bool', limit: true },
+    { n: 13, name: 'Critical Path Length Index (CPLI)', threshold: '≥0.95', key: 'cpli', dir: 'ge', limit: 0.95 },
+    { n: 14, name: 'Baseline Execution Index (BEI)', threshold: '≥0.95', key: 'bei', dir: 'ge', limit: 0.95 }
+  ];
+  var DCMA_DEFAULTS = {
+    logicGapPct: 3, leadsPct: 0, lagsPct: 6, fsPct: 92, hardConstraintPct: 4, highFloatPct: 7,
+    negFloatCount: 0, highDurationPct: 3, invalidDatesCount: 0, resourceLoadedPct: 100,
+    missedTasksPct: 4, cpTestPass: true, cpli: 0.93, bei: 0.97
+  };
+  function dcmaPass(check, val){
+    if (check.dir === 'le') return val <= check.limit;
+    if (check.dir === 'lt') return val < check.limit;
+    if (check.dir === 'ge') return val >= check.limit;
+    if (check.dir === 'bool') return val === check.limit;
+    return false;
+  }
+  var dcmaInitialized = false; // tracks first-render-vs-re-render explicitly, rather than relying on
+  // document.getElementById returning null for an id that hasn't been rendered yet -- real browsers
+  // do that, but a from-scratch DOM stub can auto-vivify any id on first lookup, which would silently
+  // make every check read NaN from an empty stub element instead of DCMA_DEFAULTS on first render.
+  function renderDcma(){
+    var body = document.getElementById('dcmaBody');
+    var rows = '';
+    var passCount = 0;
+    DCMA_CHECKS.forEach(function(check){
+      var inputId = 'dcma_' + check.key;
+      var val;
+      if (!dcmaInitialized) {
+        val = DCMA_DEFAULTS[check.key];
+      } else {
+        var existing = document.getElementById(inputId);
+        val = check.dir === 'bool' ? (existing.value === 'true') : parseFloat(existing.value);
+      }
+      var ok = dcmaPass(check, val);
+      if (ok) passCount++;
+      var inputHtml = check.dir === 'bool'
+        ? '<select id="' + inputId + '"><option value="true"' + (val ? ' selected' : '') + '>Pass</option><option value="false"' + (!val ? ' selected' : '') + '>Fail</option></select>'
+        : '<input type="number" id="' + inputId + '" value="' + val + '" step="0.01" style="width:80px">';
+      rows += '<tr><td>' + check.n + '</td><td>' + check.name + '</td><td>' + check.threshold + '</td><td>' + inputHtml + '</td><td>' + pill(ok ? 'green' : 'red') + '</td></tr>';
+    });
+    body.innerHTML = rows;
+    dcmaInitialized = true;
+    DCMA_CHECKS.forEach(function(check){
+      var el = document.getElementById('dcma_' + check.key);
+      if (el && !el.dataset.wired){ el.dataset.wired = '1'; el.addEventListener('input', renderDcma); el.addEventListener('change', renderDcma); }
+    });
+    var rate = (passCount / DCMA_CHECKS.length) * 100;
+    document.getElementById('dcmaPassRateOut').textContent = passCount + '/' + DCMA_CHECKS.length + ' (' + rate.toFixed(2) + '%)';
+    return { passCount: passCount, total: DCMA_CHECKS.length, rate: rate };
+  }
+  window.renderDcma = renderDcma;
+  window.DCMA_CHECKS = DCMA_CHECKS;
+
+  function calcCriticalChain(){
+    var complete = parseFloat(document.getElementById('ccChainComplete').value) || 0;
+    var consumed = parseFloat(document.getElementById('ccBufferConsumed').value) || 0;
+    var status;
+    if (consumed <= complete - 10) status = 'green';
+    else if (consumed >= complete + 10) status = 'red';
+    else status = 'amber';
+    document.getElementById('ccStatusOut').innerHTML = pill(status);
+    return { complete: complete, consumed: consumed, status: status };
+  }
+  window.calcCriticalChain = calcCriticalChain;
+  ['ccChainComplete', 'ccBufferConsumed'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcCriticalChain); });
+
+  function calcTakt(){
+    var target = parseFloat(document.getElementById('taktTarget').value) || 0;
+    var zones = document.getElementById('taktZones').value.split(',').map(function(s){ return parseFloat(s.trim()); }).filter(function(v){ return !isNaN(v); });
+    var tolerance = target * 0.05;
+    var withinTolerance = zones.filter(function(z){ return z >= target - tolerance && z <= target + tolerance; }).length;
+    var adherence = zones.length > 0 ? (withinTolerance / zones.length) * 100 : 0;
+    document.getElementById('taktAdherenceOut').textContent = pctStr(adherence, 2);
+    return { target: target, zones: zones, withinTolerance: withinTolerance, adherence: adherence };
+  }
+  window.calcTakt = calcTakt;
+  ['taktTarget', 'taktZones'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcTakt); });
+
+  // ---------- EVM & Cost Engineering ----------
+  function calcEvm(){
+    var BAC = parseFloat(document.getElementById('evmBac').value) || 0;
+    var PV = parseFloat(document.getElementById('evmPv').value) || 0;
+    var EV = parseFloat(document.getElementById('evmEv').value) || 0;
+    var AC = parseFloat(document.getElementById('evmAc').value) || 1;
+    var etcBottomUp = parseFloat(document.getElementById('evmEtcBottomUp').value) || 0;
+
+    var CV = EV - AC, SV = EV - PV;
+    var CPI = EV / AC, SPI = PV !== 0 ? EV / PV : 0;
+    var TCPI_BAC = (BAC - AC) !== 0 ? (BAC - EV) / (BAC - AC) : 0;
+
+    var EAC1 = AC + (BAC - EV);                          // one-time variance, no more expected
+    var EAC2 = CPI !== 0 ? BAC / CPI : 0;                  // typical, continues at current CPI
+    var EAC3 = (CPI * SPI) !== 0 ? AC + (BAC - EV) / (CPI * SPI) : 0; // cost+schedule weighted (most conservative)
+    var EAC4 = AC + etcBottomUp;                           // bottom-up re-estimate
+
+    var TCPI_EAC = (EAC3 - AC) !== 0 ? (BAC - EV) / (EAC3 - AC) : 0;
+
+    document.getElementById('outCv').textContent = fmtMoney(CV);
+    document.getElementById('outCv').style.color = CV < 0 ? 'rgb(var(--c-danger))' : 'rgb(var(--c-success))';
+    document.getElementById('outSv').textContent = fmtMoney(SV);
+    document.getElementById('outSv').style.color = SV < 0 ? 'rgb(var(--c-danger))' : 'rgb(var(--c-success))';
+    document.getElementById('outCpi').textContent = CPI.toFixed(4);
+    document.getElementById('outSpi').textContent = SPI.toFixed(4);
+    document.getElementById('outTcpiBac').textContent = TCPI_BAC.toFixed(4);
+    document.getElementById('outTcpiEac').textContent = TCPI_EAC.toFixed(4);
+
+    var methods = [
+      { name: 'EAC-1 (one-time)', assumption: 'AC + (BAC−EV): atypical variance, no more expected', eac: EAC1 },
+      { name: 'EAC-2 (typical)', assumption: 'BAC/CPI: performance continues at current CPI', eac: EAC2 },
+      { name: 'EAC-3 (weighted)', assumption: 'AC + (BAC−EV)/(CPI×SPI): cost + schedule both drive remaining work', eac: EAC3 },
+      { name: 'EAC-4 (bottom-up)', assumption: 'AC + bottom-up ETC: original estimate assumptions were wrong', eac: EAC4 }
+    ];
+    var body = document.getElementById('eacBody');
+    body.innerHTML = methods.map(function(m){
+      var vac = BAC - m.eac;
+      return '<tr><td>' + m.name + '</td><td style="font-size:11px;color:rgb(var(--c-text-secondary))">' + m.assumption + '</td>' +
+        '<td class="mono">' + fmtMoney(m.eac).replace('+', '') + '</td><td class="mono" style="color:' + (vac < 0 ? 'rgb(var(--c-danger))' : 'rgb(var(--c-success))') + '">' + fmtMoney(vac) + '</td></tr>';
+    }).join('');
+    var eacs = methods.map(function(m){ return m.eac; });
+    var spread = Math.max.apply(null, eacs) - Math.min.apply(null, eacs);
+    var spreadPct = BAC > 0 ? (spread / BAC) * 100 : 0;
+    document.getElementById('eacSpreadOut').textContent = pctStr(spreadPct, 2);
+    document.getElementById('eacSpreadFlag').textContent = spreadPct > 10
+      ? 'Spread exceeds 10% of BAC — a single-number EAC in a status report would be hiding real forecast disagreement between methods.'
+      : 'Spread within 10% of BAC — methods broadly agree.';
+    document.getElementById('execBac').textContent = '$' + (BAC / 1e6).toFixed(1) + 'M';
+    document.getElementById('execCpi').textContent = CPI.toFixed(3);
+    document.getElementById('execSpi').textContent = SPI.toFixed(3);
+    document.getElementById('execSpread').textContent = pctStr(spreadPct, 1);
+    renderExecEacBridge(BAC, EAC3);
+    return { CV: CV, SV: SV, CPI: CPI, SPI: SPI, TCPI_BAC: TCPI_BAC, TCPI_EAC: TCPI_EAC, EAC1: EAC1, EAC2: EAC2, EAC3: EAC3, EAC4: EAC4, spreadPct: spreadPct };
+  }
+  window.calcEvm = calcEvm;
+  ['evmBac', 'evmPv', 'evmEv', 'evmAc', 'evmEtcBottomUp'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcEvm); });
+
+  function renderExecEacBridge(BAC, EAC3){
+    var steps = [
+      { label: 'BAC', from: 0, to: BAC, isTotal: true },
+      { label: 'EAC-3', from: 0, to: EAC3, isTotal: true }
+    ];
+    var W = 400, H = 160, marginLeft = 50, marginRight = 16, marginTop = 16, marginBottom = 34;
+    var plotW = W - marginLeft - marginRight, plotH = H - marginTop - marginBottom;
+    var maxVal = Math.max(BAC, EAC3) * 1.1;
+    var n = steps.length, gap = 30, barW = (plotW - gap * (n - 1)) / n;
+    var bars = steps.map(function(s, i){
+      var x = marginLeft + i * (barW + gap);
+      var h = (s.to / maxVal) * plotH;
+      var y = marginTop + plotH - h;
+      var fill = i === 0 ? 'rgb(var(--c-accent)/.7)' : 'rgb(var(--c-warning)/.7)';
+      return '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + h.toFixed(1) + '" fill="' + fill + '"/>' +
+        '<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (y - 6).toFixed(1) + '" font-size="12" fill="rgb(var(--c-text-primary))" text-anchor="middle">$' + (s.to / 1e6).toFixed(1) + 'M</text>' +
+        '<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (marginTop + plotH + 16) + '" font-size="11" fill="rgb(var(--c-text-secondary))" text-anchor="middle">' + s.label + '</text>';
+    }).join('');
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;max-width:400px" role="img" aria-label="Budget at completion versus the weighted estimate at completion">' +
+      '<line x1="' + marginLeft + '" y1="' + (marginTop + plotH) + '" x2="' + (W - marginRight) + '" y2="' + (marginTop + plotH) + '" stroke="rgb(var(--c-line)/.3)" stroke-width="1"/>' +
+      bars + '</svg>';
+    document.getElementById('execEacBridgeWrap').innerHTML = svg;
+  }
+  window.renderExecEacBridge = renderExecEacBridge;
+
+  // ---------- Quality, Yield & Risk ----------
+  function mulberry32(a) {
+    return function() {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function triangularSample(rand, a, c, b) {
+    var Fc = (c - a) / (b - a);
+    var U = rand();
+    if (U < Fc) return a + Math.sqrt(U * (b - a) * (c - a));
+    return b - Math.sqrt((1 - U) * (b - a) * (b - c));
+  }
+  function calcQsra(){
+    var a = parseFloat(document.getElementById('qsraMin').value) || 0;
+    var c = parseFloat(document.getElementById('qsraMode').value) || 0;
+    var b = parseFloat(document.getElementById('qsraMax').value) || 0;
+    var rand = mulberry32(42);
+    var trials = 5000;
+    var samples = [];
+    for (var i = 0; i < trials; i++) samples.push(triangularSample(rand, a, c, b));
+    samples.sort(function(x, y){ return x - y; });
+    function pct(p){ var idx = Math.floor(p * (samples.length - 1)); return samples[idx]; }
+    var p50 = pct(0.5), p80 = pct(0.8), p95 = pct(0.95);
+    document.getElementById('qsraP50Out').textContent = p50.toFixed(1) + ' days';
+    document.getElementById('qsraP80Out').textContent = p80.toFixed(1) + ' days';
+    document.getElementById('qsraP95Out').textContent = p95.toFixed(1) + ' days';
+    return { p50: p50, p80: p80, p95: p95, samples: samples };
+  }
+  window.calcQsra = calcQsra;
+  ['qsraMin', 'qsraMode', 'qsraMax'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcQsra); });
+
+  // A simplified, clearly-labeled proxy for the real AIAG-VDA 1000-row Action Priority lookup table --
+  // severity-first, not pure multiplication, which is the actual property that motivated replacing RPN.
+  function actionPriority(s, o, d){
+    if (s >= 9) return 'High';
+    if (s * o >= 40 && d >= 5) return 'High';
+    var rpn = s * o * d;
+    if (rpn >= 200) return 'Medium';
+    return 'Low';
+  }
+  window.actionPriority = actionPriority;
+  var FMEA_ITEMS = [
+    { mode: 'Spindle bearing seizure (undetected coolant contamination)', s: 9, o: 3, d: 4 },
+    { mode: 'Cosmetic surface finish out of spec', s: 3, o: 8, d: 8 },
+    { mode: 'Composite delamination at bond line', s: 7, o: 7, d: 7 },
+    { mode: 'Fastener torque below spec, caught at final QC', s: 5, o: 4, d: 3 },
+    { mode: 'Label/marking misprint, high detection rate', s: 8, o: 2, d: 9 }
+  ];
+  function renderFmea(){
+    var body = document.getElementById('fmeaBody');
+    var rows = FMEA_ITEMS.map(function(item){
+      var rpn = item.s * item.o * item.d;
+      var ap = actionPriority(item.s, item.o, item.d);
+      var apColor = ap === 'High' ? 'rgb(var(--c-danger))' : (ap === 'Medium' ? 'rgb(var(--c-warning))' : 'rgb(var(--c-success))');
+      return '<tr><td>' + item.mode + '</td><td>' + item.s + '</td><td>' + item.o + '</td><td>' + item.d + '</td><td class="mono">' + rpn + '</td><td style="color:' + apColor + ';font-weight:700">' + ap + '</td></tr>';
+    }).join('');
+    body.innerHTML = rows;
+    var maxRpn = Math.max.apply(null, FMEA_ITEMS.map(function(i){ return i.s * i.o * i.d; }));
+    var highApLowRpn = FMEA_ITEMS.filter(function(item){
+      var rpn = item.s * item.o * item.d;
+      return actionPriority(item.s, item.o, item.d) === 'High' && rpn < maxRpn;
+    });
+    if (highApLowRpn.length > 0) {
+      document.getElementById('fmeaDivergenceNote').textContent = '"' + highApLowRpn[0].mode + '" is flagged Action-Priority HIGH (severity ' + highApLowRpn[0].s + ') with RPN=' + (highApLowRpn[0].s * highApLowRpn[0].o * highApLowRpn[0].d) + ' — lower than the highest RPN in this table (' + maxRpn + '). Any watch-list built on an RPN threshold alone would risk missing it. This is exactly the real, documented failure mode that led AIAG-VDA to replace RPN with Action Priority in 2019.';
+    }
+    return { items: FMEA_ITEMS };
+  }
+  window.renderFmea = renderFmea;
+
+  var FPY_SITES = [
+    { site: 'Site A', fpy: 97.2 }, { site: 'Site B', fpy: 94.8 },
+    { site: 'Site C', fpy: 91.5 }, { site: 'Site D', fpy: 98.1 }
+  ];
+  function renderFpy(){
+    var body = document.getElementById('fpyBody');
+    body.innerHTML = FPY_SITES.map(function(s){
+      var status = statusOf(s.fpy, 95, 90);
+      return '<tr><td>' + s.site + '</td><td class="mono">' + s.fpy.toFixed(1) + '%</td><td>' + pill(status) + '</td></tr>';
+    }).join('');
+    return { sites: FPY_SITES };
+  }
+  window.renderFpy = renderFpy;
+  window.FPY_SITES = FPY_SITES;
+
+  function calcRcca(){
+    var d1 = parseFloat(document.getElementById('rccaD1').value) || 0;
+    var d3 = parseFloat(document.getElementById('rccaD3').value) || 0;
+    var d8 = parseFloat(document.getElementById('rccaD8').value) || 0;
+    var contain = d3 - d1, total = d8 - d1;
+    document.getElementById('rccaContainOut').textContent = contain + ' days';
+    document.getElementById('rccaTotalOut').textContent = total + ' days';
+    return { contain: contain, total: total };
+  }
+  window.calcRcca = calcRcca;
+  ['rccaD1', 'rccaD3', 'rccaD8'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcRcca); });
+
+  var PPAP_FRAMEWORKS = { aiag: { label: 'AIAG PPAP', total: 18 }, as9145: { label: 'AS9145', total: 11 } };
+  function calcPpap(){
+    var fw = document.getElementById('ppapFramework').value;
+    var complete = parseFloat(document.getElementById('ppapComplete').value) || 0;
+    var total = PPAP_FRAMEWORKS[fw].total;
+    var pct = total > 0 ? (complete / total) * 100 : 0;
+    document.getElementById('ppapCompletionOut').textContent = complete + '/' + total + ' (' + pct.toFixed(2) + '%)';
+    return { framework: fw, total: total, complete: complete, pct: pct };
+  }
+  window.calcPpap = calcPpap;
+  window.PPAP_FRAMEWORKS = PPAP_FRAMEWORKS;
+  ['ppapFramework', 'ppapComplete'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcPpap); document.getElementById(id).addEventListener('change', calcPpap); });
+
+  // ---------- Supply Chain & Procurement ----------
+  function calcTierCoverage(){
+    var critical = parseFloat(document.getElementById('tierCriticalParts').value) || 0;
+    var mapped = parseFloat(document.getElementById('tierMappedParts').value) || 0;
+    var pct = critical > 0 ? (mapped / critical) * 100 : 0;
+    document.getElementById('tierCoverageOut').textContent = pctStr(pct, 2);
+    return { critical: critical, mapped: mapped, pct: pct };
+  }
+  window.calcTierCoverage = calcTierCoverage;
+  ['tierCriticalParts', 'tierMappedParts'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcTierCoverage); });
+
+  function calcDualSource(){
+    var critical = parseFloat(document.getElementById('dualCriticalParts').value) || 0;
+    var dual = parseFloat(document.getElementById('dualSourcedParts').value) || 0;
+    var pct = critical > 0 ? (dual / critical) * 100 : 0;
+    document.getElementById('dualCoverageOut').textContent = pctStr(pct, 2);
+    return { critical: critical, dual: dual, pct: pct };
+  }
+  window.calcDualSource = calcDualSource;
+  ['dualCriticalParts', 'dualSourcedParts'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcDualSource); });
+
+  function calcFatSat(){
+    var contractValue = parseFloat(document.getElementById('fatContractValue').value) || 0;
+    var fatPct = parseFloat(document.getElementById('fatPct').value) || 0;
+    var satPct = parseFloat(document.getElementById('satPct').value) || 0;
+    var finalPct = 100 - fatPct - satPct;
+    var fatAmt = contractValue * fatPct / 100;
+    var satAmt = contractValue * satPct / 100;
+    var finalAmt = contractValue * finalPct / 100;
+    document.getElementById('fatSatBody').innerHTML =
+      '<tr><td>FAT</td><td>' + fatPct + '%</td><td class="mono">$' + Math.round(fatAmt).toLocaleString() + '</td></tr>' +
+      '<tr><td>SAT</td><td>' + satPct + '%</td><td class="mono">$' + Math.round(satAmt).toLocaleString() + '</td></tr>' +
+      '<tr><td>Final acceptance</td><td>' + finalPct.toFixed(1) + '%</td><td class="mono">$' + Math.round(finalAmt).toLocaleString() + '</td></tr>';
+    return { fatAmt: fatAmt, satAmt: satAmt, finalAmt: finalAmt };
+  }
+  window.calcFatSat = calcFatSat;
+  ['fatContractValue', 'fatPct', 'satPct'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcFatSat); });
+
+  function calcSupplierScorecard(){
+    var otif = parseFloat(document.getElementById('scOtif').value) || 0;
+    var ppm = parseFloat(document.getElementById('scPpm').value) || 0;
+    var billing = parseFloat(document.getElementById('scBilling').value) || 0;
+    document.getElementById('scOtifOut').textContent = otif.toFixed(1) + '%';
+    document.getElementById('scPpmOut').textContent = ppm.toLocaleString();
+    document.getElementById('scBillingOut').textContent = billing.toFixed(1) + '%';
+    return { otif: otif, ppm: ppm, billing: billing };
+  }
+  window.calcSupplierScorecard = calcSupplierScorecard;
+  ['scOtif', 'scPpm', 'scBilling'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcSupplierScorecard); });
+
+  // ---------- Change Governance & Traceability ----------
+  function calcEco(){
+    var times = document.getElementById('ecoCycleTimes').value.split(',').map(function(s){ return parseFloat(s.trim()); }).filter(function(v){ return !isNaN(v); });
+    var avg = times.length > 0 ? times.reduce(function(a, b){ return a + b; }, 0) / times.length : 0;
+    document.getElementById('ecoAvgOut').textContent = avg.toFixed(2) + ' days';
+    return { times: times, avg: avg };
+  }
+  window.calcEco = calcEco;
+  document.getElementById('ecoCycleTimes').addEventListener('input', calcEco);
+
+  function calcDigitalThread(){
+    var units = parseFloat(document.getElementById('dtUnits').value) || 0;
+    var complete = parseFloat(document.getElementById('dtComplete').value) || 0;
+    var pct = units > 0 ? (complete / units) * 100 : 0;
+    document.getElementById('dtCompletenessOut').textContent = pctStr(pct, 2);
+    return { units: units, complete: complete, pct: pct };
+  }
+  window.calcDigitalThread = calcDigitalThread;
+  ['dtUnits', 'dtComplete'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcDigitalThread); });
+
+  function calcScopeCreep(){
+    var directed = parseFloat(document.getElementById('scopeCustomerDirected').value) || 0;
+    var rework = parseFloat(document.getElementById('scopeContractorRework').value) || 0;
+    var recovered = parseFloat(document.getElementById('scopeReaRecovered').value) || 0;
+    var rate = directed > 0 ? (recovered / directed) * 100 : 0;
+    document.getElementById('reaRecoveryOut').textContent = pctStr(rate, 2);
+    return { directed: directed, rework: rework, recovered: recovered, rate: rate };
+  }
+  window.calcScopeCreep = calcScopeCreep;
+  ['scopeCustomerDirected', 'scopeContractorRework', 'scopeReaRecovered'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcScopeCreep); });
+
+  function calcCq(){
+    var total = parseFloat(document.getElementById('cqTotal').value) || 0;
+    var signed = parseFloat(document.getElementById('cqSignedOff').value) || 0;
+    var pct = total > 0 ? (signed / total) * 100 : 0;
+    document.getElementById('cqCompletionOut').textContent = pctStr(pct, 2);
+    return { total: total, signed: signed, pct: pct };
+  }
+  window.calcCq = calcCq;
+  ['cqTotal', 'cqSignedOff'].forEach(function(id){ document.getElementById(id).addEventListener('input', calcCq); });
+
+  // ---------- Executive tab static content ----------
+  var EXEC_RAG = [
+    { program: 'Program Alpha (3 sites)', cost: 'green', schedule: 'amber', scope: 'green', quality: 'green' },
+    { program: 'Program Beta (2 sites)', cost: 'amber', schedule: 'red', scope: 'amber', quality: 'green' },
+    { program: 'Program Gamma (4 sites)', cost: 'green', schedule: 'green', scope: 'green', quality: 'amber' }
+  ];
+  function renderExecRag(){
+    document.getElementById('execRagBody').innerHTML = EXEC_RAG.map(function(p){
+      return '<tr><td>' + p.program + '</td><td>' + pill(p.cost) + '</td><td>' + pill(p.schedule) + '</td><td>' + pill(p.scope) + '</td><td>' + pill(p.quality) + '</td></tr>';
+    }).join('');
+  }
+  window.renderExecRag = renderExecRag;
+  window.EXEC_RAG = EXEC_RAG;
+
+  var EXEC_RISKS = [
+    { risk: 'Long-lead forging supplier single-source disruption', p50: 1200000, p80: 2600000 },
+    { risk: 'Composite autoclave capacity bottleneck at ramp', p50: 800000, p80: 1900000 },
+    { risk: 'Cleanroom certification delay (Line 3)', p50: 450000, p80: 1100000 },
+    { risk: 'Titanium commodity price spike', p50: 300000, p80: 750000 },
+    { risk: 'Cross-site tooling contention (Q3 peak)', p50: 200000, p80: 480000 }
+  ];
+  function renderExecRisks(){
+    document.getElementById('execRiskBody').innerHTML = EXEC_RISKS.map(function(r){
+      return '<tr><td>' + r.risk + '</td><td class="mono">$' + r.p50.toLocaleString() + '</td><td class="mono">$' + r.p80.toLocaleString() + '</td></tr>';
+    }).join('');
+  }
+  window.renderExecRisks = renderExecRisks;
+  window.EXEC_RISKS = EXEC_RISKS;
+
+  // ---------- Diagnostic Playbook (remaining methods, verification-tagged) ----------
+  var PLAYBOOK = [
+    { num: 1, method: 'Performance Measurement Baseline (PMB) Control', tag: 'real-contested',
+      note: 'Real, core EIA-748 discipline (formal Change Control Board gating of baseline changes). Contested for Agile/dynamic environments — DoD/NDIA and Agile practitioners are in open, unresolved tension over rigid baseline freezing.' },
+    { num: 2, method: 'Single Source of Truth / Common Data Environment (CDE)', tag: 'corrected',
+      note: 'CDE is a construction/BIM-native term (ISO 19650) — no evidence of genuine manufacturing/PLM usage. The real manufacturing-native equivalent is "digital thread" or "unified data environment," not CDE.' },
+    { num: 3, method: 'Standardized Factory-Level Work Package Templating', tag: 'real-partial',
+      note: 'Real for Lean/TPS "standardized work" (extensively documented, Toyota cross-plant replication). Thinner evidence for a single named "work package template" standard specifically for manufacturing production work — best described as a synthesis, not one codified doctrine.' },
+    { num: 4, method: 'Multi-Site Tooling & Specialized Equipment Levelling', tag: 'real-partial',
+      note: 'Strongly evidenced for autoclaves specifically (real, peer-reviewed aerospace-composite scheduling literature — genuine $1-5M capital bottleneck economics). Thin evidence for grouping CNCs/metrology rigs/calibration chambers into the same named practice.' },
+    { num: 5, method: 'Quality Cost Risk Analysis (QCRA)', tag: 'real',
+      note: 'Real, AACE 57R-09-adjacent quantitative cost risk analysis, producing P50/P80 cost outputs — the cost-side counterpart to this dashboard\'s QSRA schedule Monte Carlo, covered conceptually by the 4-method EAC bracket on the EVM tab.' },
+    { num: 6, method: 'Zero-Defect Early Warning (FPY auto-pausing procurement)', tag: 'unverified',
+      note: 'First Pass Yield (FPY) itself is real and standard. No evidence was found that FPY dipping below a threshold automatically pauses upstream procurement as a named, documented practice — this reads as a plausible-sounding but unevidenced automation claim.' },
+    { num: 7, method: 'Tier-N Digital Twin Supply-Chain Visibility', tag: 'real-overclaimed',
+      note: 'Real leading-edge case studies exist (Ford, JD.com multi-tier digital twins). But a 2024 peer-reviewed study found only ~16% of self-labeled "digital twins" achieve true closed-loop capability — most are rebranded monitoring dashboards. Treat "digital twin" claims skeptically unless a specific deployment is named.' },
+    { num: 8, method: 'Dual-Sourcing Safety Stock "at Secondary Sites"', tag: 'real-partial',
+      note: 'Dual-sourcing itself is classical, well-documented supply-chain-risk-management practice. Holding the safety-stock buffer specifically "at secondary sites" is a reasonable extension, not a separately-named, independently-documented sub-practice.' },
+    { num: 9, method: 'Contract Baseline & Scope Creep Management', tag: 'real',
+      note: 'Scope creep is real, PMI-documented terminology. Separating customer-directed changes from contractor-caused rework for equitable-adjustment recovery is a real, FAR-Changes-Clause-grounded contract-management practice — see the Change tab\'s live REA recovery calculator.' },
+    { num: 10, method: 'Post-Production Handover & Factory Acceptance Protocol', tag: 'real',
+      note: 'Formal, checklist-driven commissioning-to-operations handover gates (SAT report, commissioning records, punch-list sign-off) are documented standard practice — functionally the site-side continuation of the FAT concept on the Supply Chain tab.' },
+    { num: 11, method: '"Under Three Clicks" Dashboard Drill-Down', tag: 'corrected',
+      note: 'This is the specific, 20+-year-old debunked UX myth (Porter 2003; Nielsen). No drop-off in success/satisfaction was found after 3 clicks in the original research; changing a design from 3 to 4 clicks increased conversion 600% in a separate study. Not used as a design constraint on this dashboard.' },
+    { num: 12, method: 'Multi-Tier Dashboard "Level 1-4" Numbering', tag: 'corrected',
+      note: 'The source document\'s dashboard-tier numbering collides with (but does not match) both ISA-95\'s real Level 0-4 automation hierarchy and ISA-101\'s separate Level 1-4 HMI hierarchy. Three different "Level 1-4" schemes exist in this domain — this dashboard\'s own tabs are named by function, not by number, to avoid the collision.' }
+  ];
+  function renderPlaybook(){
+    var TAG_LABEL = {
+      real: 'REAL', 'real-contested': 'REAL, CONTESTED', 'real-partial': 'REAL, PARTIAL EVIDENCE',
+      'real-overclaimed': 'REAL, OFTEN OVERCLAIMED', corrected: 'CORRECTED', unverified: 'UNVERIFIED'
+    };
+    var TAG_CLASS = {
+      real: 'real', 'real-contested': 'real', 'real-partial': 'real', 'real-overclaimed': 'real',
+      corrected: 'corrected', unverified: 'illustrative'
+    };
+    document.getElementById('pbList').innerHTML = PLAYBOOK.map(function(item){
+      return '<div class="card"><div class="card-head"><h2>' + item.num + '. ' + item.method + '</h2>' +
+        '<span class="srctag ' + TAG_CLASS[item.tag] + '">' + TAG_LABEL[item.tag] + '</span></div>' +
+        '<p style="font-size:12.5px;color:rgb(var(--c-text-secondary));margin:0">' + item.note + '</p></div>';
+    }).join('');
+    return { count: PLAYBOOK.length };
+  }
+  window.renderPlaybook = renderPlaybook;
+  window.PLAYBOOK = PLAYBOOK;
+
+  // ---------- Init ----------
+  calcControlAccountIntegrity();
+  calcBomSync();
+  renderDcma();
+  calcCriticalChain();
+  calcTakt();
+  calcEvm();
+  calcQsra();
+  renderFmea();
+  renderFpy();
+  calcRcca();
+  calcPpap();
+  calcTierCoverage();
+  calcDualSource();
+  calcFatSat();
+  calcSupplierScorecard();
+  calcEco();
+  calcDigitalThread();
+  calcScopeCreep();
+  calcCq();
+  renderExecRag();
+  renderExecRisks();
+  renderPlaybook();
+
+  activateTab('exec', { focus: false });
+})();
+</script>
+</body>
+</html>
