@@ -409,6 +409,17 @@ check(Array.isArray(sandbox.EXEC_RAG) && sandbox.EXEC_RAG.length === 3, "exactly
 check(Array.isArray(sandbox.EXEC_RISKS) && sandbox.EXEC_RISKS.length === 5, "exactly 5 risks in the Top-5 Risk table", sandbox.EXEC_RISKS ? sandbox.EXEC_RISKS.length : null);
 check(sandbox.EXEC_RISKS.every((r, i) => i === 0 || sandbox.EXEC_RISKS[i - 1].p80 >= r.p80), "the 5 risks are pre-sorted descending by P80 exposure, matching a real Pareto-style top-risk view", JSON.stringify(sandbox.EXEC_RISKS.map((r) => r.p80)));
 
+console.log("--- Self-check: the on-page verifyBadge count matches this file's own final tally ---");
+// /stress-test finding, 2026-09-06: the prior round's own fixer updated this file's check count
+// (221->239) and README's prose, but missed the actual on-page #verifyBadge text, which still
+// hardcoded "221/221 CHECKS PASSING" -- the exact fabrication-guard device this dashboard family
+// relies on to stay honest about its own test coverage, silently stale. Runs LAST, deliberately:
+// `passes` here is the exact count of every check before this one, and this check itself becomes
+// one more passing assertion -- so the badge must cite passes+1, not passes.
+const expectedBadgeCount = passes + 1;
+const badgeMatch = html.match(/id="verifyBadge">✓ ([\d,]+)\/([\d,]+) CHECKS PASSING</);
+check(!!badgeMatch && badgeMatch[1] === String(expectedBadgeCount) && badgeMatch[2] === String(expectedBadgeCount), "the #verifyBadge text matches this file's own final passing count exactly (no stale hand-updated number)", badgeMatch ? `badge=${badgeMatch[1]}/${badgeMatch[2]} expected=${expectedBadgeCount}` : "verifyBadge not found");
+
 console.log("");
 console.log(failures === 0 ? "All stress checks passed." : `${failures} stress check(s) FAILED (${passes} passed).`);
 process.exit(failures === 0 ? 0 : 1);

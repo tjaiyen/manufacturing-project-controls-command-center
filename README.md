@@ -119,7 +119,7 @@ separating customer-directed changes from contractor rework.
 
 ## Verification
 
-Run: `node stress.cjs` — 239 checks, all passing as of this writing. Every golden value (EVM/EAC
+Run: `node stress.cjs` — 240 checks, all passing as of this writing. Every golden value (EVM/EAC
 figures, the QSRA Monte Carlo P50/P80/P95 percentiles, the DCMA pass count, every calculator's
 output) was pre-registered by hand or via a standalone Node script *before* being written into
 `stress.cjs`, then confirmed against the real page's own JS logic, then confirmed a second time live
@@ -166,7 +166,8 @@ reviewer) on this build found and fixed one real accessibility bug and several t
   "Verified 2026-09-05."
 
 **Accepted limitations (unchanged from the first round):** the `#verifyBadge` count is static markup
-kept in sync by hand, same as every sibling repo; the `prefers-reduced-motion` rule has nothing to
+kept in sync by hand, same as every sibling repo — see the fourth round below for why that alone
+wasn't enough; the `prefers-reduced-motion` rule has nothing to
 disable (no `transition`/`animation` exists anywhere on the page) — harmless boilerplate, left as-is.
 
 **Third round (2026-09-06):** an external review pass found 5 more real defects (2 HIGH bugs, 1 MED
@@ -209,6 +210,16 @@ Added a dedicated `stress.cjs` regression check for each defect, including a WCA
 run directly against the CSS token values (the specific gap this round's own contrast finding called
 out — "stress.cjs has no CSS/contrast assertions") and a structural `<label for=>`/`id=` audit, both
 new categories of check for this file.
+
+**Fourth round (2026-09-06, follow-up):** the third round's own fixer updated `stress.cjs` (221→239)
+and this README's prose, but missed the actual on-page `#verifyBadge` markup, which still hardcoded
+"221/221 CHECKS PASSING" — caught during an independent post-push verification pass, not by
+stress.cjs itself (it had zero coverage of the badge text). Fixed the stale number and, since "kept in
+sync by hand" had now demonstrably failed once, added a self-check (matching the `D62`-style pattern
+already used in the sibling `project-controls-command-center` repo) that reads the badge's own text
+and asserts it exactly equals this file's final passing count — including the off-by-one correction
+that check itself requires, since it becomes one more passing assertion the moment it's added. Checks:
+239 → 240 (+1).
 
 Pushed and public: [tjaiyen/manufacturing-project-controls-command-center](https://github.com/tjaiyen/manufacturing-project-controls-command-center),
 live at https://tjaiyen.github.io/manufacturing-project-controls-command-center/.
