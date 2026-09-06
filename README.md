@@ -169,5 +169,5 @@ reviewer) on this build found and fixed one real accessibility bug and several t
 kept in sync by hand, same as every sibling repo; the `prefers-reduced-motion` rule has nothing to
 disable (no `transition`/`animation` exists anywhere on the page) — harmless boilerplate, left as-is.
 
-Local commit only — push pending explicit confirmation, same discipline as every sibling repo in
-this session.
+Pushed and public: [tjaiyen/manufacturing-project-controls-command-center](https://github.com/tjaiyen/manufacturing-project-controls-command-center),
+live at https://tjaiyen.github.io/manufacturing-project-controls-command-center/.
